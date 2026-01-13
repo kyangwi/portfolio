@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Manager | Bwenge Kyangwi</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+
+    <script type="module">
+        import { injectLayout } from './js/layout.js';
+        injectLayout();
+    </script>
+</head>
+
+<body class="font-sans antialiased text-gray-800 flex flex-col min-h-screen bg-gray-50">
+    <main class="flex-1 bg-gray-50">
+        <!-- Header -->
+        <section class="pt-28 pb-10 px-4 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 shadow-sm">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex items-center mb-4">
+                    <a href="/admin.html" class="flex items-center text-gray-300 hover:text-white transition mr-4">
+                        <i data-feather="arrow-left" class="w-5 h-5 mr-1"></i> Back
+                    </a>
+                    <h1 class="text-3xl font-bold text-white">CV Manager</h1>
+                </div>
+                <p class="text-gray-300">Update your profile, skills, education, and experience</p>
+            </div>
+        </section>
+        <div class="max-w-4xl mx-auto pt-8 pb-16 px-4">
+            <!-- Profile Section -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
+                <h2 class="text-xl font-bold mb-4 flex items-center"><i data-feather="user" class="mr-2"></i> Profile &
+                    Summaries</h2>
+                <form id="cv-profile-form" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="cp-name" placeholder="Full Name" class="border rounded p-2 w-full">
+                        <input type="text" id="cp-title" placeholder="Professional Title"
+                            class="border rounded p-2 w-full">
+                        <input type="email" id="cp-email" placeholder="Email" class="border rounded p-2 w-full">
+                        <input type="text" id="cp-phone" placeholder="Phone" class="border rounded p-2 w-full">
+                        <input type="text" id="cp-location" placeholder="Location" class="border rounded p-2 w-full">
+                        <input type="url" id="cp-linkedin" placeholder="LinkedIn URL" class="border rounded p-2 w-full">
+                        <input type="url" id="cp-github" placeholder="GitHub URL" class="border rounded p-2 w-full">
+                        <input type="url" id="cp-portfolio" placeholder="Portfolio URL"
+                            class="border rounded p-2 w-full">
+                    </div>
+                    <div>
+                        <textarea id="cp-summary" rows="3" placeholder="Professional Summary"
+                            class="border rounded p-2 w-full"></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <textarea id="cp-edu-sum" rows="2" placeholder="Education Summary"
+                            class="border rounded p-2 w-full"></textarea>
+                        <textarea id="cp-exp-sum" rows="2" placeholder="Experience Summary"
+                            class="border rounded p-2 w-full"></textarea>
+                        <textarea id="cp-cert-sum" rows="2" placeholder="Certifications Summary"
+                            class="border rounded p-2 w-full"></textarea>
+                    </div>
+                    <div class="text-right">
+                        <button type="submit"
+                            class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Update
+                            Profile</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Sections: Education, Experience, Skills -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Education -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold flex items-center"><i data-feather="book" class="mr-2"></i>
+                            Education</h2>
+                        <button id="add-edu-btn" class="text-green-600 hover:text-green-700 text-sm font-medium">+
+                            Add</button>
+                    </div>
+                    <div id="edu-list" class="space-y-3"></div>
+                </div>
+
+                <!-- Experience -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold flex items-center"><i data-feather="briefcase" class="mr-2"></i>
+                            Experience</h2>
+                        <button id="add-exp-btn" class="text-green-600 hover:text-green-700 text-sm font-medium">+
+                            Add</button>
+                    </div>
+                    <div id="exp-list" class="space-y-3"></div>
+                </div>
+
+                <!-- Skills -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold flex items-center"><i data-feather="cpu" class="mr-2"></i> Skills
+                        </h2>
+                        <button id="add-skill-btn" class="text-green-600 hover:text-green-700 text-sm font-medium">+
+                            Add</button>
+                    </div>
+                    <div id="skill-list" class="space-y-3"></div>
+                </div>
+
+                <!-- Certifications -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold flex items-center"><i data-feather="award" class="mr-2"></i>
+                            Certifications</h2>
+                        <button id="add-cert-btn" class="text-green-600 hover:text-green-700 text-sm font-medium">+
+                            Add</button>
+                    </div>
+                    <div id="cert-list" class="space-y-3"></div>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- Modals -->
+        <!-- Overlay -->
+        <div id="modal-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden transition-opacity"></div>
+
+        <!-- Education Modal -->
+        <div id="modal-education" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in-up">
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 class="text-lg font-bold">Add Education</h3>
+                    <button class="modal-close text-gray-400 hover:text-gray-600"><i data-feather="x"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <input type="text" id="edu-degree" placeholder="Degree (e.g. BSc Computer Science)"
+                        class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none">
+                    <input type="text" id="edu-institution" placeholder="Institution"
+                        class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="text" id="edu-start" placeholder="Start Year"
+                            class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none">
+                        <input type="text" id="edu-end" placeholder="End Year"
+                            class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none">
+                    </div>
+                </div>
+                <div class="p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
+                    <button
+                        class="modal-close px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg mr-2 transition">Cancel</button>
+                    <button id="save-edu-btn"
+                        class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-lg">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Experience Modal -->
+        <div id="modal-experience" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-fade-in-up">
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 class="text-lg font-bold">Add Experience</h3>
+                    <button class="modal-close text-gray-400 hover:text-gray-600"><i data-feather="x"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <input type="text" id="exp-title" placeholder="Job Title"
+                        class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none">
+                    <input type="text" id="exp-company" placeholder="Company"
+                        class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs text-gray-500 ml-1">Start Date</label>
+                            <input type="date" id="exp-start"
+                                class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 ml-1">End Date (Leave empty if current)</label>
+                            <input type="date" id="exp-end"
+                                class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none">
+                        </div>
+                    </div>
+                    <textarea id="exp-desc" rows="3" placeholder="Brief Description (Optional)"
+                        class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none"></textarea>
+                </div>
+                <div class="p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
+                    <button
+                        class="modal-close px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg mr-2 transition">Cancel</button>
+                    <button id="save-exp-btn"
+                        class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-lg">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Skills Modal -->
+        <div id="modal-skill" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in-up">
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 class="text-lg font-bold">Add Skill</h3>
+                    <button class="modal-close text-gray-400 hover:text-gray-600"><i data-feather="x"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <input type="text" id="skill-category" placeholder="Category (e.g. Frontend, AI)"
+                        class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none">
+                    <input type="text" id="skill-items" placeholder="Skill Name (e.g. React, Python)"
+                        class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none">
+
+                    <!-- Icon Picker -->
+                    <div class="flex gap-4 items-center">
+                        <div class="flex-1">
+                            <label class="text-xs text-gray-500 ml-1">Icon Name (<a href="https://feathericons.com/"
+                                    target="_blank" class="text-blue-500 underline">Feather Icons</a>)</label>
+                            <input type="text" id="skill-icon" placeholder="e.g. code, database, server"
+                                class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none">
+                        </div>
+                        <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200"
+                            id="skill-icon-preview">
+                            <i data-feather="help-circle" class="text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
+                    <button
+                        class="modal-close px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg mr-2 transition">Cancel</button>
+                    <button id="save-skill-btn"
+                        class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-lg">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Certification Modal -->
+        <div id="modal-certification" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in-up">
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 class="text-lg font-bold">Add Certification</h3>
+                    <button class="modal-close text-gray-400 hover:text-gray-600"><i data-feather="x"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <input type="text" id="cert-name" placeholder="Certification Name"
+                        class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none">
+                    <input type="text" id="cert-issuer" placeholder="Issuer (e.g. Coursera, Google)"
+                        class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none">
+                    <div>
+                        <label class="text-xs text-gray-500 ml-1">Issue Date</label>
+                        <input type="date" id="cert-date"
+                            class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none">
+                    </div>
+                    <input type="url" id="cert-url" placeholder="Credential URL (Optional)"
+                        class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none">
+                </div>
+                <div class="p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
+                    <button
+                        class="modal-close px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg mr-2 transition">Cancel</button>
+                    <button id="save-cert-btn"
+                        class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-lg">Save</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- We will use JS prompts for simple adding of items first to save complexity, or simple modal overlay if needed -->
+
+    <script type="module" src="./js/cv_manager.js"></script>
+</body>
+
+</html>

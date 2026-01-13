@@ -1,0 +1,148 @@
+/* Custom styles for blog.html */
+.text-gradient {
+    background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.blog-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.blog-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Block content placeholder styling */
+[contenteditable][data-placeholder]:empty:before {
+    content: attr(data-placeholder);
+    color: #94a3b8;
+    pointer-events: none;
+}
+
+[contenteditable]:focus {
+    outline: none;
+}
+
+/* Block hover effects */
+.block-container:hover .add-block-btn {
+    opacity: 1;
+}
+
+/* Code block styling */
+pre code {
+    font-family: 'Fira Code', 'Consolas', monospace;
+    line-height: 1.5;
+    tab-size: 4;
+    white-space: pre-wrap;
+}
+
+/* Quote block styling */
+blockquote {
+    margin: 1.5em 0;
+    padding-left: 1em;
+    border-left: 4px solid #e5e7eb;
+    font-style: italic;
+    color: #4b5563;
+}
+
+/* Image block styling */
+.image-block img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+}
+
+/* Toolbar animations */
+#formatting-toolbar {
+    transition: opacity 0.2s ease-in-out;
+    z-index: 50;
+}
+
+#formatting-toolbar.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Block menu animations */
+#block-menu {
+    transition: opacity 0.2s ease-in-out;
+    z-index: 50;
+}
+
+#block-menu.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Prose styling for text content */
+.prose {
+    max-width: 65ch;
+}
+
+.prose h1 {
+    font-size: 2em;
+    font-weight: 700;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+.prose h2 {
+    font-size: 1.5em;
+    font-weight: 600;
+    margin-top: 1.4em;
+    margin-bottom: 0.4em;
+}
+
+.prose h3 {
+    font-size: 1.25em;
+    font-weight: 600;
+    margin-top: 1.3em;
+    margin-bottom: 0.3em;
+}
+
+.prose p {
+    margin: 1em 0;
+    line-height: 1.75;
+}
+
+.prose a {
+    color: #2563eb;
+    text-decoration: underline;
+}
+
+.prose strong {
+    font-weight: 600;
+    color: #111827;
+}
+
+.prose em {
+    font-style: italic;
+}
+
+/* Featured image upload styling */
+#featured-image-preview {
+    transition: opacity 0.3s ease-in-out;
+}
+
+#add-featured-image {
+    transition: border-color 0.3s ease-in-out;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .block-container .add-block-btn {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    
+    #formatting-toolbar {
+        position: fixed;
+        bottom: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        top: auto !important;
+    }
+}

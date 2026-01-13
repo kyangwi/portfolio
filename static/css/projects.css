@@ -1,0 +1,10 @@
+/* Custom styles for projects.html */
+.project-card:hover .project-overlay {
+    opacity: 1;
+}
+.text-gradient {
+    background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}

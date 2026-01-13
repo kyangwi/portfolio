@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects | Bwenge Kyangwi</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="/static/css/projects.css">
+
+    <script type="module">
+        import { injectLayout } from './js/layout.js';
+        injectLayout();
+    </script>
+    <style>
+        .project-overlay {
+            transition: opacity 0.3s ease;
+        }
+
+        .bg-white:hover .project-overlay {
+            opacity: 1 !important;
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+
+<body class="font-sans antialiased text-gray-800 flex flex-col min-h-screen overflow-x-hidden">
+    <!-- Navbar injected by layout.js -->
+
+    <main class="flex-1">
+        <!-- Projects Header -->
+        <section
+            class="pt-32 pb-16 px-4 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-b border-gray-800">
+            <div class="max-w-7xl mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4 text-white" data-aos="fade-up">Projects & <span
+                        class="text-gradient">Achievements</span></h1>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto" data-aos="fade-up" data-aos-delay="100">Explore my
+                    portfolio of data science, AI projects and competition achievements</p>
+            </div>
+        </section>
+
+        <!-- Projects Grid -->
+        <section class="py-12 px-4">
+            <div class="max-w-7xl mx-auto">
+                <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Projects Populated by JS -->
+                    <p class="text-center col-span-3 text-gray-500">Loading projects...</p>
+                </div>
+
+                <div class="mt-12 text-center">
+                    <button
+                        class="bg-blue-600 text-white px-6 py-3 rounded-md font-medium hover:bg-blue-700 transition hidden"
+                        id="load-more-btn">
+                        Load More Projects
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="./js/projects.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Editor | Bwenge Kyangwi</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+
+    <script type="module">
+        import { injectLayout } from './js/layout.js';
+        injectLayout();
+    </script>
+</head>
+
+<body class="font-sans antialiased text-gray-800 flex flex-col min-h-screen bg-gray-50">
+    <!-- Navbar injected by layout.js -->
+
+    <main class="flex-1 pt-32 pb-16 px-4">
+        <div class="max-w-3xl mx-auto">
+            <h1 class="text-3xl font-bold mb-8">Manage Project</h1>
+
+            <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                <form id="project-form" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Project Title</label>
+                        <input type="text" id="project-title" required
+                            class="w-full border border-gray-300 rounded-lg p-2 focus:ring-green-500 focus:border-green-500"
+                            placeholder="e.g. EV Charging Optimization">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea id="project-description" required rows="4"
+                            class="w-full border border-gray-300 rounded-lg p-2 focus:ring-green-500 focus:border-green-500"
+                            placeholder="Project details..."></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Technologies (comma
+                                separated)</label>
+                            <input type="text" id="project-tech"
+                                class="w-full border border-gray-300 rounded-lg p-2 focus:ring-green-500 focus:border-green-500"
+                                placeholder="Python, React, AI">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Badge (Optional)</label>
+                            <input type="text" id="project-badge"
+                                class="w-full border border-gray-300 rounded-lg p-2 focus:ring-green-500 focus:border-green-500"
+                                placeholder="e.g. 1st Place">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Project Link (Optional)</label>
+                        <input type="url" id="project-link"
+                            class="w-full border border-gray-300 rounded-lg p-2 focus:ring-green-500 focus:border-green-500"
+                            placeholder="https://...">
+                    </div>
+
+                    <div>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="project-featured"
+                                class="rounded text-green-600 focus:ring-green-500 h-4 w-4">
+                            <span class="ml-2 text-sm text-gray-700">Featured (Show on Homepage)</span>
+                        </label>
+                    </div>
+
+                    <!-- Image Upload -->
+                    <div class="p-4 border rounded-lg bg-gray-50">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Project Image</label>
+                        <input type="file" id="project-image-input" accept="image/*"
+                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
+                        <div id="project-image-preview"
+                            class="mt-4 hidden relative w-full h-48 bg-gray-200 rounded-lg overflow-hidden">
+                            <img src="" class="w-full h-full object-cover">
+                            <button type="button" id="remove-image-btn"
+                                class="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md hover:bg-red-50 text-red-600">
+                                <i data-feather="x" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end space-x-4 pt-4 border-t">
+                        <a href="/admin.html"
+                            class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">Cancel</a>
+                        <button type="submit"
+                            class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition shadow-md">Save
+                            Project</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="./js/project_editor.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV | Bwenge Kyangwi</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script type="module">
+        import { injectLayout } from './js/layout.js';
+        injectLayout();
+    </script>
+
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        main {
+            flex: 1;
+        }
+
+        .section-title {
+            position: relative;
+            padding-bottom: 12px;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%);
+        }
+
+        .download-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(22, 163, 74, 0.5);
+        }
+
+        .download-btn i {
+            color: white;
+            width: 24px;
+            height: 24px;
+        }
+    </style>
+</head>
+
+<body class="font-sans antialiased text-gray-800 flex flex-col min-h-screen overflow-x-hidden">
+    <!-- Navbar injected by layout.js -->
+
+    <main class="flex-1">
+        <!-- CV Content -->
+        <section class="py-12 px-4 bg-gray-50 mt-12" id="cv-content-section">
+            <div class="max-w-4xl mx-auto">
+                <div id="cv-loading" class="text-center py-10 text-gray-500">Loading CV...</div>
+
+                <!-- Profile Section -->
+                <div id="cv-profile"></div>
+
+                <!-- Skills Section -->
+                <div id="cv-skills"></div>
+
+                <!-- Education Section -->
+                <div id="cv-education"></div>
+
+                <!-- Experience Section -->
+                <div id="cv-experience"></div>
+
+                <!-- Certifications Section -->
+                <div id="cv-certifications"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Floating Download Button -->
+    <button class="download-btn" id="download-cv-btn" title="Download CV as PDF">
+        <i data-feather="download"></i>
+    </button>
+
+    <script type="module" src="./js/cv.js"></script>
+</body>
+
+</html>
