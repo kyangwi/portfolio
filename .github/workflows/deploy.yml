@@ -1,0 +1,17 @@
+name: Deploy to Firebase Hosting on merge
+'on':
+  push:
+    branches:
+      - main
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      # No build step needed for raw HTML/JS
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PORTFOLIO_5EC3C }}'
+          channelId: live
+          projectId: portfolio-5ec3c
