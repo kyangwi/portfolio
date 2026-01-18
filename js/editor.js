@@ -5,12 +5,17 @@ import { compressImage, getBase64Size } from './imageCompressor.js';
 let currentPostId = null;
 let featuredImageBase64 = null;
 
+let quill; // Quill editor instance
+
 async function init() {
     const user = await getCurrentUser();
     if (!user) {
         window.location.href = '/login.html';
         return;
     }
+
+    // Initialize Quill editor
+    initializeQuill();
 
     // Check if editing existing post
     const params = new URLSearchParams(window.location.search);
@@ -19,7 +24,6 @@ async function init() {
         loadPost(editId);
     }
 
-    setupToolbar();
     setupImageHandlers();
 
     document.getElementById('save-draft-btn').addEventListener('click', () => savePost('draft'));
@@ -30,10 +34,14 @@ async function loadPost(id) {
     try {
         const post = await getBlogPost(id);
         if (post) {
-            currentPostId = post.id; // Store doc ID
+            currentPostId = post.id;
             document.getElementById('post-title').value = post.title;
             document.getElementById('post-description').value = post.description;
-            document.getElementById('editor-content').innerHTML = post.content;
+
+            // Set Quill content
+            if (post.content) {
+                quill.root.innerHTML = post.content;
+            }
 
             if (post.image_base64 || post.featured_image_base64) {
                 featuredImageBase64 = post.image_base64 || post.featured_image_base64;
@@ -45,25 +53,54 @@ async function loadPost(id) {
     }
 }
 
-function setupToolbar() {
-    document.querySelectorAll('[data-cmd]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const cmd = btn.dataset.cmd;
-            const val = btn.dataset.val;
-            document.execCommand(cmd, false, val);
-            document.getElementById('editor-content').focus();
-        });
+function initializeQuill() {
+    // Configure Quill with modules
+    quill = new Quill('#quill-editor', {
+        theme: 'snow',
+        placeholder: 'Start writing your article...',
+        modules: {
+            syntax: {
+                highlight: text => hljs.highlightAuto(text).value
+            },
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                ['blockquote', 'code-block'],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                [{ 'indent': '-1' }, { 'indent': '+1' }],
+                ['link', 'image'],
+                [{ 'color': [] }, { 'background': [] }],
+                ['clean']
+            ]
+        }
     });
 
-    document.getElementById('create-link-btn').addEventListener('click', () => {
-        const url = prompt("Enter URL:", "https://");
-        if (url) document.execCommand("createLink", false, url);
-    });
+    // Custom image handler with compression
+    const toolbar = quill.getModule('toolbar');
+    toolbar.addHandler('image', async () => {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
 
-    document.getElementById('insert-img-btn').addEventListener('click', () => {
-        const url = prompt("Enter Image URL:", "https://");
-        if (url) document.execCommand("insertImage", false, url);
+        input.onchange = async () => {
+            const file = input.files[0];
+            if (file) {
+                try {
+                    // Compress the image
+                    const compressedBase64 = await compressImage(file);
+
+                    // Insert into editor
+                    const range = quill.getSelection(true);
+                    quill.insertEmbed(range.index, 'image', compressedBase64);
+                    quill.setSelection(range.index + 1);
+                } catch (error) {
+                    console.error('Image compression error:', error);
+                    alert('Failed to insert image: ' + error.message);
+                }
+            }
+        };
+
+        input.click();
     });
 }
 
@@ -114,7 +151,7 @@ function showImagePreview(src) {
 async function savePost(status) {
     const title = document.getElementById('post-title').value;
     const description = document.getElementById('post-description').value;
-    const content = document.getElementById('editor-content').innerHTML;
+    const content = quill.root.innerHTML; // Get HTML from Quill
 
     if (!title) {
         alert("Title is required");
@@ -125,9 +162,9 @@ async function savePost(status) {
         title,
         description,
         content,
-        image_base64: featuredImageBase64, // Use image_base64 to be consistent
+        image_base64: featuredImageBase64,
         status,
-        read_time: Math.ceil(content.split(' ').length / 200) // Simple estimate
+        read_time: Math.ceil(quill.getText().split(' ').length / 200) // Estimate using Quill's getText()
     };
 
     if (status === 'published') {
