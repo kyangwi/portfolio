@@ -33,7 +33,8 @@ async function init() {
 async function loadPost(id) {
     console.log('loadPost called with ID:', id);
     try {
-        const post = await getBlogPost(id);
+        // Bypass cache to get fresh data for editing
+        const post = await getBlogPost(id, true);
         console.log('Fetched post:', post);
 
         if (post) {

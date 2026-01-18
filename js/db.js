@@ -166,7 +166,26 @@ export async function getAllBlogs() {
     });
 }
 
-export async function getBlogPost(id) {
+export async function getBlogPost(id, bypassCache = false) {
+    if (bypassCache) {
+        // Fetch directly from Firestore without caching (for editing)
+        try {
+            const docRef = doc(db, "blog_posts", id);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) return { id: docSnap.id, ...docSnap.data() };
+        } catch (e) {
+            console.error('Error fetching blog post directly:', e);
+        }
+
+        // Try post_id query
+        const q = query(collection(db, "blog_posts"), where("post_id", "==", id));
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+            return { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
+        }
+        return null;
+    }
+
     // Cache individual posts too
     return cachedFetch(`cache_post_${id}`, async () => {
         // Try Doc ID first
