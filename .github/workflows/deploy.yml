@@ -15,3 +15,4 @@ jobs:
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PORTFOLIO_5EC3C }}'
           channelId: live
           projectId: portfolio-5ec3c
+          target: bwengeportfolio
