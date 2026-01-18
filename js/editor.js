@@ -14,17 +14,17 @@ async function init() {
         return;
     }
 
-    // Initialize Quill editor
+    // Initialize Quill editor first
     initializeQuill();
 
-    // Check if editing existing post
+    setupImageHandlers();
+
+    // Check if editing existing post (after Quill is ready)
     const params = new URLSearchParams(window.location.search);
     const editId = params.get('id');
     if (editId) {
-        loadPost(editId);
+        await loadPost(editId);
     }
-
-    setupImageHandlers();
 
     document.getElementById('save-draft-btn').addEventListener('click', () => savePost('draft'));
     document.getElementById('publish-btn').addEventListener('click', () => savePost('published'));
@@ -38,9 +38,10 @@ async function loadPost(id) {
             document.getElementById('post-title').value = post.title;
             document.getElementById('post-description').value = post.description;
 
-            // Set Quill content
+            // Set Quill content using proper API
             if (post.content) {
-                quill.root.innerHTML = post.content;
+                // Use Quill's clipboard API to insert HTML safely
+                quill.clipboard.dangerouslyPasteHTML(post.content);
             }
 
             if (post.image_base64 || post.featured_image_base64) {
