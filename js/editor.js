@@ -31,23 +31,33 @@ async function init() {
 }
 
 async function loadPost(id) {
+    console.log('loadPost called with ID:', id);
     try {
         const post = await getBlogPost(id);
+        console.log('Fetched post:', post);
+
         if (post) {
             currentPostId = post.id;
             document.getElementById('post-title').value = post.title;
             document.getElementById('post-description').value = post.description;
 
+            console.log('About to set Quill content:', post.content ? post.content.substring(0, 50) + '...' : 'NO CONTENT');
+
             // Set Quill content using proper API
             if (post.content) {
                 // Use Quill's clipboard API to insert HTML safely
                 quill.clipboard.dangerouslyPasteHTML(post.content);
+                console.log('Quill content set successfully');
+            } else {
+                console.warn('Post has no content to load');
             }
 
             if (post.image_base64 || post.featured_image_base64) {
                 featuredImageBase64 = post.image_base64 || post.featured_image_base64;
                 showImagePreview(featuredImageBase64);
             }
+        } else {
+            console.error('No post found with ID:', id);
         }
     } catch (e) {
         console.error("Error loading post", e);
