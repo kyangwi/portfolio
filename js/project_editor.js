@@ -1,5 +1,6 @@
 import { getCurrentUser } from './auth.js';
 import { addProject, updateProject, getAllProjects } from './db.js';
+import { compressImage, getBase64Size } from './imageCompressor.js';
 
 let currentProjectId = null;
 let imageBase64 = null;
@@ -53,15 +54,30 @@ async function loadProject(id) {
 function setupImageHandlers() {
     const input = document.getElementById('project-image-input');
 
-    input.addEventListener('change', (e) => {
+    input.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onload = (evt) => {
-                imageBase64 = evt.target.result;
+            try {
+                // Show loading indicator
+                const loadingMsg = document.createElement('div');
+                loadingMsg.textContent = 'Compressing image...';
+                loadingMsg.className = 'text-sm text-gray-500 mt-2';
+                input.parentElement.appendChild(loadingMsg);
+
+                // Compress the image
+                imageBase64 = await compressImage(file);
+
+                // Show size info
+                const sizeInfo = getBase64Size(imageBase64);
+                loadingMsg.textContent = `Compressed to ${sizeInfo}`;
+                setTimeout(() => loadingMsg.remove(), 3000);
+
                 showImagePreview(imageBase64);
-            };
-            reader.readAsDataURL(file);
+            } catch (error) {
+                console.error('Compression error:', error);
+                alert('Failed to compress image: ' + error.message);
+                input.value = '';
+            }
         }
     });
 
