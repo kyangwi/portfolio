@@ -8,12 +8,13 @@ let featuredImageBase64 = null;
 let quill; // Quill editor instance
 
 async function init() {
-    // const user = await getCurrentUser();
-    // if (!user) {
-    //    window.location.href = '/login.html';
-    //    return;
-    // }
-    console.log("DEBUG: Auth check bypassed");
+    const user = await getCurrentUser();
+    if (!user) {
+        console.warn("User not logged in, redirecting...");
+        window.location.href = '/login.html';
+        return;
+    }
+    console.log("DEBUG: Auth verified", user.uid);
 
     // Initialize Quill editor first
     initializeQuill();
@@ -68,9 +69,11 @@ async function loadPost(id) {
             }
         } else {
             console.error('No post found with ID:', id);
+            alert("Error: Could not find the blog post. It may have been deleted or the ID is incorrect.");
         }
     } catch (e) {
         console.error("Error loading post", e);
+        alert("Error loading post data: " + e.message);
     }
 }
 
