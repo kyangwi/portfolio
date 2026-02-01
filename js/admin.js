@@ -135,7 +135,7 @@ async function loadDashboardData() {
                 </span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                ${new Date(b.published_at).toLocaleDateString()}
+                ${b.published_at || b.created_at ? new Date(b.published_at || b.created_at).toLocaleDateString() : '-'}
             </td>
              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <a href="/editor.html?id=${b.id}" class="text-blue-600 hover:text-blue-900 mr-3">Edit</a>
