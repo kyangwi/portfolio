@@ -1,28 +1,9 @@
 import { getCurrentUser } from './auth.js';
-import { addBlogPost, updateBlogPost, getBlogPost } from './db.js';
+import { addBlogPost, updateBlogPost, getBlogPost, getAllBlogs } from './db.js';
 import { compressImage, getBase64Size } from './imageCompressor.js';
 
 let currentPostId = null;
 let featuredImageBase64 = null;
-
-// Debug helper
-function logToScreen(msg, type = 'info') {
-    const debugLog = document.getElementById('debug-log');
-    if (!debugLog) return;
-    const line = document.createElement('div');
-    line.textContent = `[${new Date().toLocaleTimeString()}] ${type.toUpperCase()}: ${msg}`;
-    if (type === 'error') line.style.color = '#ff6b6b';
-    debugLog.appendChild(line);
-    debugLog.scrollTop = debugLog.scrollHeight;
-}
-
-const originalLog = console.log;
-const originalError = console.error;
-const originalWarn = console.warn;
-
-console.log = (...args) => { originalLog(...args); logToScreen(args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')); };
-console.error = (...args) => { originalError(...args); logToScreen(args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '), 'error'); };
-console.warn = (...args) => { originalWarn(...args); logToScreen(args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '), 'warn'); };
 
 let quill; // Quill editor instance
 
@@ -33,7 +14,6 @@ async function init() {
         window.location.href = '/login.html';
         return;
     }
-    console.log("DEBUG: Auth verified", user.uid);
 
     // Initialize Quill editor first
     initializeQuill();
@@ -43,16 +23,8 @@ async function init() {
     // Check if editing existing post (after Quill is ready)
     const params = new URLSearchParams(window.location.search);
     const editId = params.get('id');
-    console.log("DEBUG: extracted editId:", editId);
     if (editId) {
-        console.log("DEBUG: calling loadPost...");
-        try {
-            await loadPost(editId);
-        } catch (e) {
-            console.error("DEBUG: loadPost failed:", e);
-        }
-    } else {
-        console.log("DEBUG: No editId found");
+        await loadPost(editId);
     }
 
     document.getElementById('save-draft-btn').addEventListener('click', () => savePost('draft'));
@@ -60,26 +32,20 @@ async function init() {
 }
 
 async function loadPost(id) {
-    console.log('loadPost called with ID:', id);
     try {
-        // Bypass cache to get fresh data for editing
-        const post = await getBlogPost(id, true);
-        console.log('Fetched post:', post);
+        // Fetch ALL, then find. This matches the reliable project_editor.js approach.
+        // It handles both document IDs and post_id slugs automatically via client-side find.
+        const allBlogs = await getAllBlogs();
+        const post = allBlogs.find(p => p.id === id || p.post_id === id);
 
         if (post) {
             currentPostId = post.id;
-            document.getElementById('post-title').value = post.title;
-            document.getElementById('post-description').value = post.description;
+            document.getElementById('post-title').value = post.title || '';
+            document.getElementById('post-description').value = post.description || '';
 
-            console.log('About to set Quill content:', post.content ? post.content.substring(0, 50) + '...' : 'NO CONTENT');
-
-            // Set Quill content using proper API
+            // Set Quill content
             if (post.content) {
-                // Use Quill's clipboard API to insert HTML safely
                 quill.clipboard.dangerouslyPasteHTML(post.content);
-                console.log('Quill content set successfully');
-            } else {
-                console.warn('Post has no content to load');
             }
 
             if (post.image_base64 || post.featured_image_base64) {
