@@ -106,15 +106,21 @@
                     <!-- Quill will inject the toolbar and editor here -->
                 </div>
 
-                <!-- Actions -->
-                <div class="mt-8 flex justify-end space-x-4">
-                    <button id="save-draft-btn"
-                        class="px-6 py-2 border border-green-600 rounded-md text-green-700 hover:bg-green-50 transition flex items-center">
-                        <i data-feather="save" class="w-4 h-4 mr-2"></i> Save Draft
+                <!-- Debug Console -->
+                <div class="mt-8 p-4 bg-gray-900 text-green-400 rounded-lg font-mono text-xs overflow-x-auto">
+                    <h3 class="font-bold border-b border-gray-700 mb-2 pb-1">Debug Console</h3>
+                    <div id="debug-log" class="whitespace-pre-wrap h-48 overflow-y-auto"></div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="flex justify-end space-x-4 mt-8">
+                    <button type="button" id="save-draft-btn"
+                        class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
+                        Save Draft
                     </button>
-                    <button id="publish-btn"
-                        class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition flex items-center shadow-md">
-                        <i data-feather="send" class="w-4 h-4 mr-2"></i> Publish
+                    <button type="button" id="publish-btn"
+                        class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                        Publish
                     </button>
                 </div>
             </div>

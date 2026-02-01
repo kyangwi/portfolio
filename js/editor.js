@@ -5,6 +5,25 @@ import { compressImage, getBase64Size } from './imageCompressor.js';
 let currentPostId = null;
 let featuredImageBase64 = null;
 
+// Debug helper
+function logToScreen(msg, type = 'info') {
+    const debugLog = document.getElementById('debug-log');
+    if (!debugLog) return;
+    const line = document.createElement('div');
+    line.textContent = `[${new Date().toLocaleTimeString()}] ${type.toUpperCase()}: ${msg}`;
+    if (type === 'error') line.style.color = '#ff6b6b';
+    debugLog.appendChild(line);
+    debugLog.scrollTop = debugLog.scrollHeight;
+}
+
+const originalLog = console.log;
+const originalError = console.error;
+const originalWarn = console.warn;
+
+console.log = (...args) => { originalLog(...args); logToScreen(args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')); };
+console.error = (...args) => { originalError(...args); logToScreen(args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '), 'error'); };
+console.warn = (...args) => { originalWarn(...args); logToScreen(args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '), 'warn'); };
+
 let quill; // Quill editor instance
 
 async function init() {
