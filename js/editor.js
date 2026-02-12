@@ -2,257 +2,270 @@ import { getCurrentUser } from './auth.js';
 import { addBlogPost, updateBlogPost, getBlogPost, getAllBlogs } from './db.js';
 import { compressImage, getBase64Size } from './imageCompressor.js';
 
-let currentPostId = null;
-let featuredImageBase64 = null;
+const state = {
+    quill: null,
+    currentPostId: null,
+    featuredImageBase64: null,
+    isSaving: false
+};
 
-let quill; // Quill editor instance
-
-async function init() {
-    try {
-        const user = await getCurrentUser();
-        if (!user) {
-            console.warn("User not logged in, redirecting...");
-            window.location.href = '/login.html';
-            return;
-        }
-
-        // Initialize Quill editor first
-        initializeQuill();
-
-        setupImageHandlers();
-
-        // Check if editing existing post (after Quill is ready)
-        const params = new URLSearchParams(window.location.search);
-        const editId = params.get('id');
-        if (editId) {
-            await loadPost(editId);
-        }
-
-        document.getElementById('save-draft-btn').addEventListener('click', () => savePost('draft'));
-        document.getElementById('publish-btn').addEventListener('click', () => savePost('published'));
-    } catch (e) {
-        console.error("Editor initialization failed:", e);
-        alert(`Editor failed to initialize: ${e?.message || e}. Please refresh and try again.`);
-    }
+function byId(id) {
+    return document.getElementById(id);
 }
 
-async function loadPost(id) {
-    try {
-        // Prefer direct fetch for edit mode to avoid stale cache/list-query issues.
-        let post = await getBlogPost(id, true);
+function getEditIdFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('id');
+}
 
-        // Treat "empty shell" documents as invalid for editing.
-        if (isEffectivelyEmptyPost(post)) {
-            post = null;
-        }
-
-        // Fallback for legacy records/unexpected ID formats, and resolve duplicates safely.
-        if (!post) {
-            const allBlogs = await getAllBlogs();
-            const exactIdMatches = allBlogs.filter(p => p.id === id);
-            const postIdMatches = allBlogs.filter(p => p.post_id === id);
-            const candidates = [...exactIdMatches, ...postIdMatches];
-
-            if (candidates.length > 0) {
-                post = pickBestPostCandidate(candidates);
-            }
-        }
-
-        if (post) {
-            currentPostId = post.id;
-            document.getElementById('post-title').value = post.title || '';
-            document.getElementById('post-description').value = post.description || '';
-
-            // Set Quill content
-            if (post.content) {
-                quill.clipboard.dangerouslyPasteHTML(post.content);
-            }
-
-            if (post.image_base64 || post.featured_image_base64) {
-                featuredImageBase64 = post.image_base64 || post.featured_image_base64;
-                showImagePreview(featuredImageBase64);
-            }
-        } else {
-            console.error('No post found with ID:', id);
-            alert("Error: Could not find the blog post. It may have been deleted or the ID is incorrect.");
-        }
-    } catch (e) {
-        console.error("Error loading post", e);
-        alert("Error loading post data: " + e.message);
-    }
+function isNonEmptyString(value) {
+    return typeof value === 'string' && value.trim().length > 0;
 }
 
 function isEffectivelyEmptyPost(post) {
     if (!post) return true;
-
-    const title = typeof post.title === 'string' ? post.title.trim() : '';
-    const description = typeof post.description === 'string' ? post.description.trim() : '';
-    const content = typeof post.content === 'string' ? post.content.trim() : '';
-    const image = post.image_base64 || post.featured_image_base64;
-
-    return !title && !description && !content && !image;
+    if (isNonEmptyString(post.title)) return false;
+    if (isNonEmptyString(post.description)) return false;
+    if (isNonEmptyString(post.content)) return false;
+    if (post.image_base64 || post.featured_image_base64) return false;
+    return true;
 }
 
 function pickBestPostCandidate(candidates) {
-    const score = (p) => {
+    const score = (post) => {
         let s = 0;
-        if (p && typeof p.title === 'string' && p.title.trim()) s += 3;
-        if (p && typeof p.content === 'string' && p.content.trim()) s += 3;
-        if (p && typeof p.description === 'string' && p.description.trim()) s += 2;
-        if (p && (p.image_base64 || p.featured_image_base64)) s += 1;
-        if (p && p.status === 'published') s += 1;
+        if (isNonEmptyString(post?.title)) s += 3;
+        if (isNonEmptyString(post?.content)) s += 3;
+        if (isNonEmptyString(post?.description)) s += 2;
+        if (post?.image_base64 || post?.featured_image_base64) s += 1;
+        if (post?.status === 'published') s += 1;
         return s;
     };
 
-    return candidates
-        .slice()
-        .sort((a, b) => score(b) - score(a))[0];
+    return candidates.slice().sort((a, b) => score(b) - score(a))[0] || null;
 }
 
 function initializeQuill() {
     if (typeof Quill === 'undefined') {
-        throw new Error('Quill editor library failed to load');
+        throw new Error('Quill failed to load');
     }
 
-    const hasHljs = typeof hljs !== 'undefined';
-
-    // Configure Quill with modules
-    quill = new Quill('#quill-editor', {
+    state.quill = new Quill('#quill-editor', {
         theme: 'snow',
         placeholder: 'Start writing your article...',
         modules: {
-            syntax: hasHljs ? {
-                highlight: text => hljs.highlightAuto(text).value
-            } : false,
             toolbar: [
-                [{ 'header': [1, 2, 3, false] }],
+                [{ header: [1, 2, 3, false] }],
                 ['bold', 'italic', 'underline', 'strike'],
-                ['blockquote', 'code-block'],
-                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                [{ 'indent': '-1' }, { 'indent': '+1' }],
-                ['link', 'image'],
-                [{ 'color': [] }, { 'background': [] }],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                ['blockquote', 'link', 'image'],
+                [{ color: [] }, { background: [] }],
                 ['clean']
             ]
         }
     });
 
-    // Custom image handler with compression
-    const toolbar = quill.getModule('toolbar');
-    toolbar.addHandler('image', async () => {
-        const input = document.createElement('input');
-        input.setAttribute('type', 'file');
-        input.setAttribute('accept', 'image/*');
-
-        input.onchange = async () => {
-            const file = input.files[0];
-            if (file) {
-                try {
-                    // Compress the image
-                    const compressedBase64 = await compressImage(file);
-
-                    // Insert into editor
-                    const range = quill.getSelection(true);
-                    quill.insertEmbed(range.index, 'image', compressedBase64);
-                    quill.setSelection(range.index + 1);
-                } catch (error) {
-                    console.error('Image compression error:', error);
-                    alert('Failed to insert image: ' + error.message);
-                }
-            }
-        };
-
-        input.click();
-    });
+    const toolbar = state.quill.getModule('toolbar');
+    if (toolbar) {
+        toolbar.addHandler('image', () => openInlineImagePicker());
+    }
 }
 
-function setupImageHandlers() {
-    const input = document.getElementById('featured-image-input');
+async function openInlineImagePicker() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.click();
 
-    input.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            try {
-                // Show loading indicator
-                const loadingMsg = document.createElement('div');
-                loadingMsg.textContent = 'Compressing image...';
-                loadingMsg.className = 'text-sm text-gray-500 mt-2';
-                input.parentElement.appendChild(loadingMsg);
+    input.onchange = async () => {
+        const file = input.files && input.files[0];
+        if (!file) return;
 
-                // Compress the image
-                featuredImageBase64 = await compressImage(file);
-
-                // Show size info
-                const sizeInfo = getBase64Size(featuredImageBase64);
-                loadingMsg.textContent = `Compressed to ${sizeInfo}`;
-                setTimeout(() => loadingMsg.remove(), 3000);
-
-                showImagePreview(featuredImageBase64);
-            } catch (error) {
-                console.error('Compression error:', error);
-                alert('Failed to compress image: ' + error.message);
-                input.value = '';
-            }
+        try {
+            const base64 = await compressImage(file);
+            const range = state.quill.getSelection(true);
+            const index = range ? range.index : state.quill.getLength();
+            state.quill.insertEmbed(index, 'image', base64, 'user');
+            state.quill.setSelection(index + 1, 0, 'user');
+        } catch (error) {
+            alert(`Failed to insert image: ${error?.message || error}`);
         }
-    });
-
-    document.getElementById('remove-image-btn').addEventListener('click', () => {
-        featuredImageBase64 = null;
-        document.getElementById('featured-image-preview').classList.add('hidden');
-        input.value = '';
-    });
+    };
 }
 
 function showImagePreview(src) {
-    const container = document.getElementById('featured-image-preview');
-    const img = container.querySelector('img');
+    const container = byId('featured-image-preview');
+    const img = container ? container.querySelector('img') : null;
+    if (!container || !img) return;
     img.src = src;
     container.classList.remove('hidden');
 }
 
-async function savePost(status) {
-    if (!quill) {
-        alert("Editor not ready yet. Please refresh and try again.");
-        return;
-    }
+function clearImagePreview() {
+    const container = byId('featured-image-preview');
+    if (container) container.classList.add('hidden');
+}
 
-    const title = document.getElementById('post-title').value;
-    const description = document.getElementById('post-description').value;
-    const content = quill.root.innerHTML; // Get HTML from Quill
+function setButtonsDisabled(disabled) {
+    byId('save-draft-btn').disabled = disabled;
+    byId('publish-btn').disabled = disabled;
+}
 
-    if (!title) {
-        alert("Title is required");
-        return;
-    }
+function bindImageHandlers() {
+    const input = byId('featured-image-input');
+    const removeBtn = byId('remove-image-btn');
+    if (!input || !removeBtn) return;
 
-    const data = {
-        title,
-        description,
-        content,
-        image_base64: featuredImageBase64,
-        status,
-        read_time: Math.ceil(quill.getText().split(' ').length / 200) // Estimate using Quill's getText()
-    };
+    input.addEventListener('change', async (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
 
-    if (status === 'published') {
-        data.published_at = new Date().toISOString();
-    }
+        try {
+            state.featuredImageBase64 = await compressImage(file);
+            showImagePreview(state.featuredImageBase64);
 
-    try {
-        if (currentPostId) {
-            await updateBlogPost(currentPostId, data);
-            alert(`Post ${status === 'published' ? 'published' : 'saved as draft'}!`);
-            window.location.href = '/admin.html';
-        } else {
-            await addBlogPost(data);
-            alert(`Post ${status === 'published' ? 'published' : 'saved as draft'}!`);
-            window.location.href = '/admin.html';
+            const sizeInfo = getBase64Size(state.featuredImageBase64);
+            console.info(`Featured image compressed to ${sizeInfo}`);
+        } catch (error) {
+            state.featuredImageBase64 = null;
+            input.value = '';
+            clearImagePreview();
+            alert(`Failed to compress featured image: ${error?.message || error}`);
         }
-    } catch (e) {
-        console.error("Error saving post", e);
-        alert("Error saving post: " + e.message);
+    });
+
+    removeBtn.addEventListener('click', () => {
+        state.featuredImageBase64 = null;
+        input.value = '';
+        clearImagePreview();
+    });
+}
+
+function bindActionHandlers() {
+    byId('save-draft-btn').addEventListener('click', () => savePost('draft'));
+    byId('publish-btn').addEventListener('click', () => savePost('published'));
+}
+
+async function fetchPostForEdit(editId) {
+    let post = await getBlogPost(editId, true);
+    if (!isEffectivelyEmptyPost(post)) return post;
+
+    const allBlogs = await getAllBlogs();
+    const exactIdMatches = allBlogs.filter((p) => p.id === editId);
+    const postIdMatches = allBlogs.filter((p) => p.post_id === editId);
+    return pickBestPostCandidate([...exactIdMatches, ...postIdMatches]);
+}
+
+function applyPostToForm(post) {
+    state.currentPostId = post.id;
+    byId('post-title').value = post.title || '';
+    byId('post-description').value = post.description || '';
+
+    state.quill.setContents([]);
+    if (isNonEmptyString(post.content)) {
+        state.quill.clipboard.dangerouslyPasteHTML(post.content);
+    }
+
+    const image = post.image_base64 || post.featured_image_base64 || null;
+    state.featuredImageBase64 = image;
+    if (image) {
+        showImagePreview(image);
+    } else {
+        clearImagePreview();
     }
 }
 
-document.addEventListener('DOMContentLoaded', init);
-if (typeof feather !== 'undefined') feather.replace();
+async function maybeLoadExistingPost() {
+    const editId = getEditIdFromUrl();
+    if (!editId) return;
+
+    const post = await fetchPostForEdit(editId);
+    if (!post) {
+        throw new Error(`No blog post found for id "${editId}"`);
+    }
+
+    applyPostToForm(post);
+}
+
+function getReadTimeMinutes(text) {
+    const words = text.trim().split(/\s+/).filter(Boolean).length;
+    const minutes = Math.ceil(words / 200);
+    return minutes > 0 ? minutes : 1;
+}
+
+async function savePost(status) {
+    if (state.isSaving) return;
+    if (!state.quill) {
+        alert('Editor is not ready yet. Please refresh and try again.');
+        return;
+    }
+
+    const title = byId('post-title').value.trim();
+    const description = byId('post-description').value.trim();
+    const content = state.quill.root.innerHTML;
+    const plainText = state.quill.getText() || '';
+
+    if (!title) {
+        alert('Title is required.');
+        return;
+    }
+
+    const payload = {
+        title,
+        description,
+        content,
+        image_base64: state.featuredImageBase64,
+        status,
+        read_time: getReadTimeMinutes(plainText)
+    };
+
+    if (status === 'published') {
+        payload.published_at = new Date().toISOString();
+    }
+
+    try {
+        state.isSaving = true;
+        setButtonsDisabled(true);
+
+        if (state.currentPostId) {
+            await updateBlogPost(state.currentPostId, payload);
+        } else {
+            await addBlogPost(payload);
+        }
+
+        alert(status === 'published' ? 'Post published!' : 'Draft saved!');
+        window.location.href = '/admin.html';
+    } catch (error) {
+        console.error('Error saving post:', error);
+        alert(`Error saving post: ${error?.message || error}`);
+    } finally {
+        state.isSaving = false;
+        setButtonsDisabled(false);
+    }
+}
+
+async function init() {
+    const user = await getCurrentUser();
+    if (!user) {
+        window.location.href = '/login.html';
+        return;
+    }
+
+    initializeQuill();
+    bindImageHandlers();
+    bindActionHandlers();
+    await maybeLoadExistingPost();
+
+    if (typeof feather !== 'undefined') {
+        feather.replace();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        await init();
+    } catch (error) {
+        console.error('Editor initialization failed:', error);
+        alert(`Editor failed to initialize: ${error?.message || error}`);
+    }
+});
