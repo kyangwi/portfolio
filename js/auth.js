@@ -44,9 +44,14 @@ export function onAuthChange(callback) {
 // Check if user is logged in
 export async function getCurrentUser() {
     return new Promise((resolve, reject) => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        // Avoid temporal dead-zone issues if callback fires immediately.
+        let unsubscribe = () => { };
+        unsubscribe = onAuthStateChanged(auth, (user) => {
             unsubscribe();
             resolve(user);
-        }, reject);
+        }, (error) => {
+            unsubscribe();
+            reject(error);
+        });
     });
 }

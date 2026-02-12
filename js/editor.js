@@ -32,7 +32,7 @@ async function init() {
         document.getElementById('publish-btn').addEventListener('click', () => savePost('published'));
     } catch (e) {
         console.error("Editor initialization failed:", e);
-        alert("Editor failed to initialize. Please refresh the page. If it persists, disable blockers and try again.");
+        alert(`Editor failed to initialize: ${e?.message || e}. Please refresh and try again.`);
     }
 }
 
