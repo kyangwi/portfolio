@@ -33,10 +33,14 @@ async function init() {
 
 async function loadPost(id) {
     try {
-        // Fetch ALL, then find. This matches the reliable project_editor.js approach.
-        // It handles both document IDs and post_id slugs automatically via client-side find.
-        const allBlogs = await getAllBlogs();
-        const post = allBlogs.find(p => p.id === id || p.post_id === id);
+        // Prefer direct fetch for edit mode to avoid stale cache/list-query issues.
+        let post = await getBlogPost(id, true);
+
+        // Fallback for legacy records or unexpected ID formats.
+        if (!post) {
+            const allBlogs = await getAllBlogs();
+            post = allBlogs.find(p => p.id === id || p.post_id === id);
+        }
 
         if (post) {
             currentPostId = post.id;
