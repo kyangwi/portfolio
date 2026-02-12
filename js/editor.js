@@ -54,6 +54,7 @@ function initializeQuill() {
         theme: 'snow',
         placeholder: 'Start writing your article...',
         modules: {
+            syntax: false,
             toolbar: [
                 [{ header: [1, 2, 3, false] }],
                 ['bold', 'italic', 'underline', 'strike'],
