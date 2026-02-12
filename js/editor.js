@@ -36,10 +36,21 @@ async function loadPost(id) {
         // Prefer direct fetch for edit mode to avoid stale cache/list-query issues.
         let post = await getBlogPost(id, true);
 
-        // Fallback for legacy records or unexpected ID formats.
+        // Treat "empty shell" documents as invalid for editing.
+        if (isEffectivelyEmptyPost(post)) {
+            post = null;
+        }
+
+        // Fallback for legacy records/unexpected ID formats, and resolve duplicates safely.
         if (!post) {
             const allBlogs = await getAllBlogs();
-            post = allBlogs.find(p => p.id === id || p.post_id === id);
+            const exactIdMatches = allBlogs.filter(p => p.id === id);
+            const postIdMatches = allBlogs.filter(p => p.post_id === id);
+            const candidates = [...exactIdMatches, ...postIdMatches];
+
+            if (candidates.length > 0) {
+                post = pickBestPostCandidate(candidates);
+            }
         }
 
         if (post) {
@@ -64,6 +75,33 @@ async function loadPost(id) {
         console.error("Error loading post", e);
         alert("Error loading post data: " + e.message);
     }
+}
+
+function isEffectivelyEmptyPost(post) {
+    if (!post) return true;
+
+    const title = typeof post.title === 'string' ? post.title.trim() : '';
+    const description = typeof post.description === 'string' ? post.description.trim() : '';
+    const content = typeof post.content === 'string' ? post.content.trim() : '';
+    const image = post.image_base64 || post.featured_image_base64;
+
+    return !title && !description && !content && !image;
+}
+
+function pickBestPostCandidate(candidates) {
+    const score = (p) => {
+        let s = 0;
+        if (p && typeof p.title === 'string' && p.title.trim()) s += 3;
+        if (p && typeof p.content === 'string' && p.content.trim()) s += 3;
+        if (p && typeof p.description === 'string' && p.description.trim()) s += 2;
+        if (p && (p.image_base64 || p.featured_image_base64)) s += 1;
+        if (p && p.status === 'published') s += 1;
+        return s;
+    };
+
+    return candidates
+        .slice()
+        .sort((a, b) => score(b) - score(a))[0];
 }
 
 function initializeQuill() {
