@@ -8,27 +8,32 @@ let featuredImageBase64 = null;
 let quill; // Quill editor instance
 
 async function init() {
-    const user = await getCurrentUser();
-    if (!user) {
-        console.warn("User not logged in, redirecting...");
-        window.location.href = '/login.html';
-        return;
+    try {
+        const user = await getCurrentUser();
+        if (!user) {
+            console.warn("User not logged in, redirecting...");
+            window.location.href = '/login.html';
+            return;
+        }
+
+        // Initialize Quill editor first
+        initializeQuill();
+
+        setupImageHandlers();
+
+        // Check if editing existing post (after Quill is ready)
+        const params = new URLSearchParams(window.location.search);
+        const editId = params.get('id');
+        if (editId) {
+            await loadPost(editId);
+        }
+
+        document.getElementById('save-draft-btn').addEventListener('click', () => savePost('draft'));
+        document.getElementById('publish-btn').addEventListener('click', () => savePost('published'));
+    } catch (e) {
+        console.error("Editor initialization failed:", e);
+        alert("Editor failed to initialize. Please refresh the page. If it persists, disable blockers and try again.");
     }
-
-    // Initialize Quill editor first
-    initializeQuill();
-
-    setupImageHandlers();
-
-    // Check if editing existing post (after Quill is ready)
-    const params = new URLSearchParams(window.location.search);
-    const editId = params.get('id');
-    if (editId) {
-        await loadPost(editId);
-    }
-
-    document.getElementById('save-draft-btn').addEventListener('click', () => savePost('draft'));
-    document.getElementById('publish-btn').addEventListener('click', () => savePost('published'));
 }
 
 async function loadPost(id) {
@@ -105,14 +110,20 @@ function pickBestPostCandidate(candidates) {
 }
 
 function initializeQuill() {
+    if (typeof Quill === 'undefined') {
+        throw new Error('Quill editor library failed to load');
+    }
+
+    const hasHljs = typeof hljs !== 'undefined';
+
     // Configure Quill with modules
     quill = new Quill('#quill-editor', {
         theme: 'snow',
         placeholder: 'Start writing your article...',
         modules: {
-            syntax: {
+            syntax: hasHljs ? {
                 highlight: text => hljs.highlightAuto(text).value
-            },
+            } : false,
             toolbar: [
                 [{ 'header': [1, 2, 3, false] }],
                 ['bold', 'italic', 'underline', 'strike'],
@@ -200,6 +211,11 @@ function showImagePreview(src) {
 }
 
 async function savePost(status) {
+    if (!quill) {
+        alert("Editor not ready yet. Please refresh and try again.");
+        return;
+    }
+
     const title = document.getElementById('post-title').value;
     const description = document.getElementById('post-description').value;
     const content = quill.root.innerHTML; // Get HTML from Quill

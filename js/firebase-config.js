@@ -19,7 +19,12 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+let analytics = null;
+try {
+  analytics = getAnalytics(app);
+} catch (error) {
+  console.warn("Analytics unavailable in this environment:", error?.message || error);
+}
 const db = getFirestore(app);
 const auth = getAuth(app);
 
