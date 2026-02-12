@@ -193,21 +193,54 @@ async function downloadCV() {
 
     const filename = loadedProfileName.replace(/\s+/g, '_') + '_CV.pdf';
 
+    // Build a stable off-screen clone to avoid viewport/scroll truncation.
+    const tempWrap = document.createElement('div');
+    tempWrap.style.position = 'fixed';
+    tempWrap.style.left = '-10000px';
+    tempWrap.style.top = '0';
+    tempWrap.style.width = '794px'; // A4 width at ~96dpi
+    tempWrap.style.background = '#f9fafb';
+    tempWrap.style.zIndex = '-1';
+
+    const clone = element.cloneNode(true);
+    const inner = clone.querySelector('.max-w-4xl');
+    if (inner) {
+        inner.style.maxWidth = '100%';
+        inner.style.width = '100%';
+        inner.style.margin = '0';
+    }
+    tempWrap.appendChild(clone);
+    document.body.appendChild(tempWrap);
+
+    // Wait one frame for layout/fonts to settle before rendering.
+    if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+    }
+    await new Promise(resolve => requestAnimationFrame(() => resolve()));
+
     const opt = {
-        margin: [10, 5, 10, 10],
+        margin: [8, 8, 8, 8],
         filename: filename,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, letterRendering: true, windowWidth: 1200 },
+        html2canvas: {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#f9fafb',
+            windowWidth: 794,
+            windowHeight: tempWrap.scrollHeight,
+            scrollY: 0
+        },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        pagebreak: { mode: ['css', 'legacy'] }
     };
 
     try {
-        await html2pdf().set(opt).from(element).save();
+        await html2pdf().set(opt).from(clone).save();
     } catch (error) {
         console.error('PDF Generation failed:', error);
         alert('Failed to generate PDF. See console.');
     } finally {
+        tempWrap.remove();
         downloadBtn.style.display = 'flex';
         // Restore AOS
         savedAos.forEach(item => {
