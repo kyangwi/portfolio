@@ -103,17 +103,35 @@
         }
 
         .prose pre {
-            background: #1f2937;
-            padding: 1em;
-            border-radius: 0.5rem;
+            background: #1e1e1e;
+            border: 1px solid #2d2d2d;
+            padding: 1rem 1.25rem;
+            border-radius: 0.75rem;
             overflow-x: auto;
             margin: 1.5em 0;
+            position: relative;
         }
 
         .prose pre code {
             background: transparent;
-            color: #fff;
+            color: #d4d4d4;
             padding: 0;
+            display: block;
+            font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .prose pre[data-language]::before {
+            content: attr(data-language);
+            position: absolute;
+            top: 0.4rem;
+            right: 0.75rem;
+            font-size: 0.72rem;
+            color: #9ca3af;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+            text-transform: uppercase;
         }
 
         .prose blockquote {

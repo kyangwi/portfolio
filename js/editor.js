@@ -195,6 +195,35 @@ function getReadTimeMinutes(text) {
     return minutes > 0 ? minutes : 1;
 }
 
+function serializeEditorContent() {
+    const editorRootClone = state.quill.root.cloneNode(true);
+
+    editorRootClone.querySelectorAll('.ql-ui').forEach((el) => el.remove());
+
+    editorRootClone.querySelectorAll('.ql-code-block-container').forEach((container) => {
+        const blocks = Array.from(container.querySelectorAll('.ql-code-block'));
+        if (blocks.length === 0) return;
+
+        const codeText = blocks.map((block) => block.textContent || '').join('\n');
+        const languageBlock = blocks.find((block) => block.dataset.language);
+        const language = languageBlock?.dataset.language || '';
+
+        const pre = document.createElement('pre');
+        const code = document.createElement('code');
+
+        if (language && language !== 'plain') {
+            code.classList.add(`language-${language}`);
+            pre.dataset.language = language.toUpperCase();
+        }
+
+        code.textContent = codeText;
+        pre.appendChild(code);
+        container.replaceWith(pre);
+    });
+
+    return editorRootClone.innerHTML;
+}
+
 async function savePost(status) {
     if (state.isSaving) return;
     if (!state.quill) {
@@ -204,7 +233,7 @@ async function savePost(status) {
 
     const title = byId('post-title').value.trim();
     const description = byId('post-description').value.trim();
-    const content = state.quill.root.innerHTML;
+    const content = serializeEditorContent();
     const plainText = state.quill.getText() || '';
 
     if (!title) {
