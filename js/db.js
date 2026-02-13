@@ -76,6 +76,12 @@ function invalidateCache(key) {
     localStorage.removeItem(key);
 }
 
+function invalidatePostCaches(...keys) {
+    keys
+        .filter((key) => typeof key === 'string' && key.trim().length > 0)
+        .forEach((key) => invalidateCache(`cache_post_${key}`));
+}
+
 // Update keys to v2 to force refresh
 function invalidateProjects() { invalidateCache('cache_v2_projects'); }
 function invalidateBlogs() { invalidateCache('cache_v2_blogs'); }
@@ -168,21 +174,37 @@ export async function getAllBlogs() {
 
 export async function getBlogPost(id, bypassCache = false) {
     if (bypassCache) {
+        console.log(`DEBUG: getBlogPost bypassCache=true for id=${id}`);
         // Fetch directly from Firestore without caching (for editing)
         try {
             const docRef = doc(db, "blog_posts", id);
+            console.log(`DEBUG: Trying fetch by docRef: blog_posts/${id}`);
             const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) return { id: docSnap.id, ...docSnap.data() };
+            console.log(`DEBUG: docSnap exists=${docSnap.exists()}`);
+            if (docSnap.exists()) {
+                console.log(`DEBUG: doc data keys: ${Object.keys(docSnap.data())}`);
+            }
+
+            // Check if document exists AND has a title (to filter out incomplete ghost documents)
+            if (docSnap.exists() && docSnap.data().title) {
+                console.log("DEBUG: Found by docRef");
+                return normalizeFirestoreData(docSnap);
+            }
         } catch (e) {
             console.error('Error fetching blog post directly:', e);
         }
 
-        // Try post_id query
+        console.log("DEBUG: Falling back to post_id query");
+        // Try post_id query (or if doc ID lookup returned incomplete data)
         const q = query(collection(db, "blog_posts"), where("post_id", "==", id));
         const snapshot = await getDocs(q);
+        console.log(`DEBUG: Query snapshot empty=${snapshot.empty}, size=${snapshot.size}`);
+
         if (!snapshot.empty) {
-            return { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
+            console.log("DEBUG: Found by post_id query");
+            return normalizeFirestoreData(snapshot.docs[0]);
         }
+        console.log("DEBUG: Not found in either path");
         return null;
     }
 
@@ -225,18 +247,26 @@ export async function addBlogPost(data) {
 
 export async function updateBlogPost(id, data) {
     const docRef = doc(db, "blog_posts", id);
+    const existingSnap = await getDoc(docRef);
+    const existingPostId = existingSnap.exists() ? existingSnap.data().post_id : null;
+    const nextPostId = typeof data?.post_id === 'string' ? data.post_id : null;
+
     await updateDoc(docRef, {
         ...data,
         updated_at: serverTimestamp()
     });
     invalidateBlogs();
-    invalidateCache(`cache_post_${id}`);
+    invalidatePostCaches(id, existingPostId, nextPostId);
 }
 
 export async function deleteBlogPost(id) {
-    await deleteDoc(doc(db, "blog_posts", id));
+    const docRef = doc(db, "blog_posts", id);
+    const existingSnap = await getDoc(docRef);
+    const existingPostId = existingSnap.exists() ? existingSnap.data().post_id : null;
+
+    await deleteDoc(docRef);
     invalidateBlogs();
-    invalidateCache(`cache_post_${id}`);
+    invalidatePostCaches(id, existingPostId);
 }
 
 
