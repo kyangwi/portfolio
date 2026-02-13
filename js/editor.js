@@ -54,12 +54,13 @@ function initializeQuill() {
         theme: 'snow',
         placeholder: 'Start writing your article...',
         modules: {
-            syntax: false,
+            syntax: typeof hljs !== 'undefined' ? { hljs } : true,
             toolbar: [
                 [{ header: [1, 2, 3, false] }],
                 ['bold', 'italic', 'underline', 'strike'],
                 [{ list: 'ordered' }, { list: 'bullet' }],
                 ['blockquote', 'link', 'image'],
+                ['code', 'code-block'],
                 [{ color: [] }, { background: [] }],
                 ['clean']
             ]
