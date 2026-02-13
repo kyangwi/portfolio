@@ -22,27 +22,27 @@ function renderBlogs(blogs) {
     if (blogs.length === 0) {
         container.innerHTML = `
         <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-16">
-            <p class="text-gray-500 text-lg">No blog posts yet.</p>
+            <p class="text-slate-400 text-lg">No blog posts yet.</p>
         </div>`;
         return;
     }
 
     container.innerHTML = blogs.map(blog => `
-        <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition duration-300" data-aos="fade-up">
-            <div class="relative overflow-hidden h-48 bg-gray-200">
+        <div class="bg-slate-900/80 border border-slate-700 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition duration-300" data-aos="fade-up">
+            <div class="relative overflow-hidden h-48 bg-slate-800">
                  ${blog.image_base64 ?
             `<img src="${blog.image_base64}" alt="${blog.title}" class="w-full h-full object-cover hover:scale-105 transition duration-300">` :
-            `<div class="w-full h-full flex items-center justify-center"><i data-feather="file-text" class="text-gray-400 w-12 h-12"></i></div>`
+            `<div class="w-full h-full flex items-center justify-center"><i data-feather="file-text" class="text-slate-500 w-12 h-12"></i></div>`
         }
             </div>
             <div class="p-6">
-                <h3 class="text-xl font-bold mb-2">${blog.title}</h3>
-                <p class="text-gray-600 mb-4 line-clamp-3">${blog.description}</p>
+                <h3 class="text-xl font-bold mb-2 text-slate-100">${blog.title}</h3>
+                <p class="text-slate-300 mb-4 line-clamp-3">${blog.description}</p>
                 <div class="flex items-center justify-between mb-4">
-                    <span class="text-gray-500 text-sm">${formatDate(blog.published_at)}</span>
-                    <span class="text-gray-500 text-sm">${blog.read_time || '5'} min read</span>
+                    <span class="text-slate-400 text-sm">${formatDate(blog.published_at)}</span>
+                    <span class="text-slate-400 text-sm">${blog.read_time || '5'} min read</span>
                 </div>
-                <a href="/post.html?id=${blog.post_id}" class="inline-flex items-center text-green-600 hover:text-green-800 font-semibold">
+                <a href="/post.html?id=${blog.post_id}" class="inline-flex items-center text-emerald-400 hover:text-emerald-300 font-semibold">
                     Read More <i data-feather="arrow-right" class="w-4 h-4 ml-2"></i>
                 </a>
             </div>

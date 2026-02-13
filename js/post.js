@@ -79,7 +79,7 @@ function renderPost(post) {
     container.innerHTML = `
         <div class="text-center mb-8">
             <h1 class="text-4xl md:text-5xl font-bold mb-4" data-aos="fade-up">${post.title}</h1>
-            <div class="flex flex-wrap items-center justify-center text-gray-600 space-x-4" data-aos="fade-up" data-aos-delay="100">
+            <div class="flex flex-wrap items-center justify-center text-slate-300 space-x-4" data-aos="fade-up" data-aos-delay="100">
                 <span>${formatDate(post.published_at)}</span>
                 <span>&bull;</span>
                 <span>${post.read_time || 5} min read</span>
@@ -96,10 +96,10 @@ function renderPost(post) {
             ${normalizedContent}
         </div>
 
-        <div class="mt-12 pt-8 border-t border-gray-200">
-            <h3 class="text-lg font-semibold mb-4">Share this article</h3>
+        <div class="mt-12 pt-8 border-t border-slate-700">
+            <h3 class="text-lg font-semibold mb-4 text-slate-100">Share this article</h3>
             <div class="flex space-x-4">
-                <button onclick="copyToClipboard('${window.location.href}')" class="bg-gray-100 p-3 rounded-full text-gray-700 hover:bg-gray-200 transition" aria-label="Copy link">
+                <button onclick="copyToClipboard('${window.location.href}')" class="bg-slate-800 border border-slate-700 p-3 rounded-full text-slate-200 hover:bg-slate-700 transition" aria-label="Copy link">
                     <i data-feather="link" class="w-5 h-5"></i>
                 </button>
             </div>

@@ -14,18 +14,18 @@ function renderProjects(projects) {
     if (!container) return;
 
     if (projects.length === 0) {
-        container.innerHTML = '<p class="text-center col-span-3 text-gray-500">No projects found.</p>';
+        container.innerHTML = '<p class="text-center col-span-3 text-slate-400">No projects found.</p>';
         return;
     }
 
     container.innerHTML = projects.map(project => `
-        <div class="bg-white rounded-xl overflow-hidden shadow-md" data-aos="fade-up">
+        <div class="bg-slate-900/80 border border-slate-700 rounded-xl overflow-hidden shadow-md" data-aos="fade-up">
             <div class="relative">
                  ${project.image_base64 ?
             `<img src="${project.image_base64}" alt="${project.title}" class="w-full h-48 object-cover">` :
-            `<div class="w-full h-48 bg-gray-200 flex items-center justify-center"><i data-feather="image" class="text-gray-400 w-12 h-12"></i></div>`
+            `<div class="w-full h-48 bg-slate-800 flex items-center justify-center"><i data-feather="image" class="text-slate-500 w-12 h-12"></i></div>`
         }
-                <div class="project-overlay absolute inset-0 bg-blue-600/90 flex items-center justify-center opacity-0 transition duration-300">
+                <div class="project-overlay absolute inset-0 bg-emerald-700/90 flex items-center justify-center opacity-0 transition duration-300">
                     ${project.link ?
             `<a href="${project.link}" target="_blank" class="text-white font-medium flex items-center">
                         <i data-feather="eye" class="mr-2"></i> View Details
@@ -36,13 +36,13 @@ function renderProjects(projects) {
             </div>
             <div class="p-6">
                 <div class="flex justify-between items-start mb-2">
-                    <h3 class="font-bold text-lg">${project.title}</h3>
-                    ${project.badge ? `<span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">${project.badge}</span>` : ''}
+                    <h3 class="font-bold text-lg text-slate-100">${project.title}</h3>
+                    ${project.badge ? `<span class="bg-emerald-500/20 text-emerald-300 text-xs px-2 py-1 rounded-full border border-emerald-500/30">${project.badge}</span>` : ''}
                 </div>
-                <p class="text-gray-600 mb-4 line-clamp-3">${project.description}</p>
+                <p class="text-slate-300 mb-4 line-clamp-3">${project.description}</p>
                 <div class="flex flex-wrap gap-2">
                      ${project.technologies ? project.technologies.map(tech =>
-            `<span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">${tech.trim()}</span>`
+            `<span class="bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-slate-700">${tech.trim()}</span>`
         ).join('') : ''}
                 </div>
             </div>

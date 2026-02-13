@@ -87,8 +87,8 @@ async function renderProjectsGrid(projects) {
     if (!container) return;
 
     container.innerHTML = projects.map(project => `
-        <div class="project-card overflow-hidden transition duration-300 group rounded-xl shadow-md bg-white border border-gray-100" data-aos="fade-up">
-            <div class="relative overflow-hidden h-48 bg-gray-200">
+        <div class="project-card overflow-hidden transition duration-300 group rounded-xl shadow-md bg-slate-900/80 border border-slate-700" data-aos="fade-up">
+            <div class="relative overflow-hidden h-48 bg-slate-800">
                  ${project.image_base64 ?
             `<img src="${project.image_base64}" alt="${project.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">` :
             `<div class="w-full h-full flex items-center justify-center"><i data-feather="image" class="text-gray-400 w-12 h-12"></i></div>`
@@ -99,17 +99,17 @@ async function renderProjectsGrid(projects) {
             </div>
 
             <div class="p-6">
-                <h3 class="font-bold text-lg mb-2 group-hover:text-green-600 transition">${project.title}</h3>
-                <p class="text-gray-600 mb-4 text-sm line-clamp-2">${project.description}</p>
+                <h3 class="font-bold text-lg mb-2 text-slate-100 group-hover:text-emerald-400 transition">${project.title}</h3>
+                <p class="text-slate-300 mb-4 text-sm line-clamp-2">${project.description}</p>
                 
                 ${project.technologies && project.technologies.length > 0 ? `
                 <div class="mb-4 flex flex-wrap gap-2">
-                    ${project.technologies.slice(0, 4).map(tech => `<span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">${tech}</span>`).join('')}
-                    ${project.technologies.length > 4 ? `<span class="text-gray-500 text-xs px-2 py-1">+${project.technologies.length - 4} more</span>` : ''}
+                    ${project.technologies.slice(0, 4).map(tech => `<span class="bg-emerald-500/20 text-emerald-300 text-xs px-2 py-1 rounded border border-emerald-500/30">${tech}</span>`).join('')}
+                    ${project.technologies.length > 4 ? `<span class="text-slate-400 text-xs px-2 py-1">+${project.technologies.length - 4} more</span>` : ''}
                 </div>` : ''}
 
                 ${project.link ? `
-                <a href="${project.link}" target="_blank" class="inline-flex items-center text-green-600 hover:text-green-800 font-semibold text-sm hover:underline">
+                <a href="${project.link}" target="_blank" class="inline-flex items-center text-emerald-400 hover:text-emerald-300 font-semibold text-sm hover:underline">
                     View Project <i data-feather="external-link" class="w-4 h-4 ml-2"></i>
                 </a>` : ''}
             </div>
@@ -128,13 +128,13 @@ async function renderAchievements(achievements) {
     const recognitions = achievements.filter(a => a.category !== 'hackathon'); // Default or recognition
 
     const renderList = (items, emptyText) => {
-        if (items.length === 0) return `<li class="text-gray-500">${emptyText}</li>`;
+        if (items.length === 0) return `<li class="text-slate-400">${emptyText}</li>`;
         return items.map(item => `
             <li class="flex items-start">
-                <div class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full mr-3 mt-1 whitespace-nowrap">${item.rank}</div>
+                <div class="bg-emerald-500/20 text-emerald-300 text-xs px-2 py-1 rounded-full mr-3 mt-1 whitespace-nowrap border border-emerald-500/30">${item.rank}</div>
                 <div>
-                    <h4 class="font-medium">${item.title}</h4>
-                    <p class="text-gray-600 text-sm">${item.description}</p>
+                    <h4 class="font-medium text-slate-100">${item.title}</h4>
+                    <p class="text-slate-300 text-sm">${item.description}</p>
                 </div>
             </li>
         `).join('');
@@ -151,27 +151,27 @@ async function renderBlogGrid(blogs) {
     if (blogs.length === 0) {
         container.innerHTML = `
         <div class="col-span-1 md:col-span-3 text-center py-16">
-            <p class="text-gray-500 text-lg">No blog posts yet.</p>
+            <p class="text-slate-400 text-lg">No blog posts yet.</p>
         </div>`;
         return;
     }
 
     container.innerHTML = blogs.map(blog => `
-        <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition duration-300 border border-gray-100" data-aos="fade-up">
-            <div class="relative overflow-hidden h-48 bg-gray-200">
+        <div class="bg-slate-900/80 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition duration-300 border border-slate-700" data-aos="fade-up">
+            <div class="relative overflow-hidden h-48 bg-slate-800">
                  ${blog.image_base64 ?
             `<img src="${blog.image_base64}" alt="${blog.title}" class="w-full h-full object-cover hover:scale-105 transition duration-300">` :
             `<div class="w-full h-full flex items-center justify-center"><i data-feather="file-text" class="text-gray-400 w-12 h-12"></i></div>`
         }
             </div>
             <div class="p-6">
-                <h3 class="text-xl font-bold mb-2 line-clamp-1">${blog.title}</h3>
-                <p class="text-gray-600 mb-4 line-clamp-3">${blog.description}</p>
+                <h3 class="text-xl font-bold mb-2 line-clamp-1 text-slate-100">${blog.title}</h3>
+                <p class="text-slate-300 mb-4 line-clamp-3">${blog.description}</p>
                 <div class="flex items-center justify-between mb-4">
-                    <span class="text-gray-500 text-sm">${formatDate(blog.published_at)}</span>
-                    <span class="text-gray-500 text-sm">${blog.read_time || '5'} min read</span>
+                    <span class="text-slate-400 text-sm">${formatDate(blog.published_at)}</span>
+                    <span class="text-slate-400 text-sm">${blog.read_time || '5'} min read</span>
                 </div>
-                <a href="/post.html?id=${blog.post_id}" class="inline-flex items-center text-green-600 hover:text-green-800 font-semibold">
+                <a href="/post.html?id=${blog.post_id}" class="inline-flex items-center text-emerald-400 hover:text-emerald-300 font-semibold">
                     Read More <i data-feather="arrow-right" class="w-4 h-4 ml-2"></i>
                 </a>
             </div>
@@ -193,20 +193,20 @@ async function renderProfileAndCV(profile, skills) {
     const skillsContainer = document.getElementById('skills-container');
     if (skillsContainer) {
         if (skills.length === 0) {
-            skillsContainer.innerHTML = '<p class="text-gray-500">No skills listed yet.</p>';
+            skillsContainer.innerHTML = '<p class="text-slate-400">No skills listed yet.</p>';
         } else {
             // Reverse order to match template logic
             skillsContainer.innerHTML = skills.reverse().map(skill => `
-                <div class="skill-card bg-white p-6 rounded-xl transition duration-300 shadow-sm border border-gray-100 group hover:shadow-md">
+                <div class="skill-card bg-slate-900/80 p-6 rounded-xl transition duration-300 shadow-sm border border-slate-700 group hover:shadow-md">
                     <div class="flex items-center mb-3">
-                        <div class="bg-green-100 p-2 rounded-full mr-3 group-hover:bg-green-200 transition">
-                            <i data-feather="${skill.icon || 'check-circle'}" class="text-green-600"></i>
+                        <div class="bg-emerald-500/20 p-2 rounded-full mr-3 group-hover:bg-emerald-500/30 transition border border-emerald-500/30">
+                            <i data-feather="${skill.icon || 'check-circle'}" class="text-emerald-400"></i>
                         </div>
-                        <h4 class="font-semibold group-hover:text-green-700 transition">${skill.category}</h4>
+                        <h4 class="font-semibold text-slate-100 group-hover:text-emerald-300 transition">${skill.category}</h4>
                     </div>
                     <div class="flex flex-wrap gap-2">
                         ${skill.skills ? (Array.isArray(skill.skills) ? skill.skills : [skill.skills]).map(tech => `
-                            <span class="bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full hover:bg-green-50 hover:text-green-700 transition cursor-default">
+                            <span class="bg-slate-800 text-slate-200 text-sm px-3 py-1 rounded-full hover:bg-emerald-500/20 hover:text-emerald-300 transition cursor-default border border-slate-700">
                                 ${tech.trim()}
                             </span>
                         `).join('') : ''}
@@ -260,30 +260,30 @@ async function renderProfileAndCV(profile, skills) {
 
         cvContainer.innerHTML = `
             <!-- Education Card -->
-            <div class="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-md">
+            <div class="bg-gradient-to-br from-emerald-900/50 to-emerald-800/30 p-6 rounded-xl shadow-md border border-emerald-700/30">
                 <div class="flex items-center mb-3">
-                    <div class="bg-green-600 p-3 rounded-full mr-3"><i data-feather="book-open" class="text-white w-5 h-5"></i></div>
-                    <h3 class="text-lg font-semibold text-gray-800">Education</h3>
+                    <div class="bg-emerald-500 p-3 rounded-full mr-3"><i data-feather="book-open" class="text-white w-5 h-5"></i></div>
+                    <h3 class="text-lg font-semibold text-slate-100">Education</h3>
                 </div>
-                <p class="text-gray-600 text-sm">${eduText}</p>
+                <p class="text-slate-200 text-sm">${eduText}</p>
             </div>
 
             <!-- Experience Card -->
-             <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl shadow-md">
+             <div class="bg-gradient-to-br from-sky-900/50 to-blue-800/30 p-6 rounded-xl shadow-md border border-blue-700/30">
                 <div class="flex items-center mb-3">
-                    <div class="bg-blue-600 p-3 rounded-full mr-3"><i data-feather="briefcase" class="text-white w-5 h-5"></i></div>
-                    <h3 class="text-lg font-semibold text-gray-800">Experience</h3>
+                    <div class="bg-blue-500 p-3 rounded-full mr-3"><i data-feather="briefcase" class="text-white w-5 h-5"></i></div>
+                    <h3 class="text-lg font-semibold text-slate-100">Experience</h3>
                 </div>
-                <p class="text-gray-600 text-sm">${expText}</p>
+                <p class="text-slate-200 text-sm">${expText}</p>
             </div>
 
             <!-- Certifications Card -->
-            <div class="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-xl shadow-md">
+            <div class="bg-gradient-to-br from-amber-900/50 to-orange-800/30 p-6 rounded-xl shadow-md border border-orange-700/30">
                 <div class="flex items-center mb-3">
-                    <div class="bg-orange-600 p-3 rounded-full mr-3"><i data-feather="award" class="text-white w-5 h-5"></i></div>
-                    <h3 class="text-lg font-semibold text-gray-800">Certifications</h3>
+                    <div class="bg-orange-500 p-3 rounded-full mr-3"><i data-feather="award" class="text-white w-5 h-5"></i></div>
+                    <h3 class="text-lg font-semibold text-slate-100">Certifications</h3>
                 </div>
-                <p class="text-gray-600 text-sm">${certText}</p>
+                <p class="text-slate-200 text-sm">${certText}</p>
             </div>
 
             <!-- View Full CV Button -->

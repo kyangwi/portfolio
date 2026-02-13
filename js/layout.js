@@ -1,5 +1,7 @@
 import { onAuthChange, logout } from './auth.js';
 
+const THEME_STORAGE_KEY = 'site-theme';
+
 const navbarHTML = `
 <nav class="fixed top-0 left-0 w-full z-50 liquid-glass">
     <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -16,11 +18,18 @@ const navbarHTML = `
                 <a href="/#achievements" class="text-white hover:text-green-600 transition">Achievements</a>
                 <a href="/#contact" class="text-white hover:text-green-600 transition">Contact</a>
                 <a href="/blog.html" class="text-white hover:text-green-600 transition">Blog</a>
+                <button id="theme-toggle-desktop" class="theme-toggle-btn" type="button" aria-label="Switch theme">
+                    <i data-feather="sun" class="w-4 h-4"></i>
+                    <span id="theme-toggle-desktop-label">Light</span>
+                </button>
                 <div id="auth-desktop" class="flex items-center"></div>
             </div>
 
             <!-- Mobile Menu Button -->
-            <div class="flex md:hidden">
+            <div class="flex md:hidden items-center gap-2">
+                <button id="theme-toggle-mobile" class="theme-toggle-btn theme-toggle-mobile-btn" type="button" aria-label="Switch theme">
+                    <i data-feather="sun" class="w-4 h-4"></i>
+                </button>
                 <button id="menu-btn" class="text-white">
                     <i data-feather="menu"></i>
                 </button>
@@ -109,10 +118,165 @@ const footerHTML = `
 export function injectLayout() {
     document.body.insertAdjacentHTML('afterbegin', navbarHTML);
     document.body.insertAdjacentHTML('beforeend', footerHTML);
+    applyTheme(getInitialTheme());
 
     // Inject Custom Styles for Navbar (Liquid Glass Global)
     const style = document.createElement('style');
     style.innerHTML = `
+        :root {
+            --theme-bg: #05080f;
+            --theme-surface: #0d1423;
+            --theme-surface-soft: #121c2f;
+            --theme-text: #e6edf7;
+            --theme-muted: #9fb0c8;
+            --theme-border: rgba(159, 176, 200, 0.25);
+            --theme-accent: #59AC77;
+        }
+
+        body.theme-light {
+            background: radial-gradient(circle at top, #f8fbff 0%, #eff3f9 38%, #e7edf5 100%);
+            color: #111827;
+        }
+
+        body.theme-dark {
+            background: radial-gradient(circle at top, #0c1424 0%, var(--theme-bg) 45%, #02050b 100%);
+            color: var(--theme-text);
+        }
+
+        body.theme-light .bg-slate-950\\/40 {
+            background-color: rgba(248, 250, 252, 0.88) !important;
+        }
+
+        body.theme-light .bg-slate-900\\/80 {
+            background-color: #ffffff !important;
+        }
+
+        body.theme-light .bg-slate-800 {
+            background-color: #eef2f7 !important;
+        }
+
+        body.theme-light .border-slate-700,
+        body.theme-light .border-slate-700\\/30,
+        body.theme-light .border-emerald-700\\/30,
+        body.theme-light .border-blue-700\\/30,
+        body.theme-light .border-orange-700\\/30,
+        body.theme-light .border-emerald-500\\/30 {
+            border-color: rgba(148, 163, 184, 0.4) !important;
+        }
+
+        body.theme-light .text-slate-100 {
+            color: #111827 !important;
+        }
+
+        body.theme-light .text-slate-200,
+        body.theme-light .text-slate-300 {
+            color: #374151 !important;
+        }
+
+        body.theme-light .text-slate-400,
+        body.theme-light .text-slate-500 {
+            color: #6b7280 !important;
+        }
+
+        body.theme-light .bg-emerald-500\\/20 {
+            background-color: #dcfce7 !important;
+        }
+
+        body.theme-light .text-emerald-300,
+        body.theme-light .text-emerald-400 {
+            color: #047857 !important;
+        }
+
+        body.theme-light [class*="from-emerald-900/50"],
+        body.theme-light [class*="to-emerald-800/30"],
+        body.theme-light [class*="from-sky-900/50"],
+        body.theme-light [class*="to-blue-800/30"],
+        body.theme-light [class*="from-amber-900/50"],
+        body.theme-light [class*="to-orange-800/30"] {
+            background-image: none !important;
+            background-color: #ffffff !important;
+        }
+
+        body.theme-dark .bg-gray-50,
+        body.theme-dark .bg-white {
+            background-color: var(--theme-surface) !important;
+        }
+
+        body.theme-dark .border-gray-100,
+        body.theme-dark .border-gray-200,
+        body.theme-dark .border-gray-300,
+        body.theme-dark .border-gray-700,
+        body.theme-dark .border-gray-800 {
+            border-color: var(--theme-border) !important;
+        }
+
+        body.theme-dark .text-gray-800,
+        body.theme-dark .text-gray-700,
+        body.theme-dark .text-gray-600 {
+            color: var(--theme-text) !important;
+        }
+
+        body.theme-dark .text-gray-500,
+        body.theme-dark .text-gray-400,
+        body.theme-dark .text-gray-300 {
+            color: var(--theme-muted) !important;
+        }
+
+        body.theme-dark input,
+        body.theme-dark textarea,
+        body.theme-dark select {
+            background-color: #0f172a;
+            color: var(--theme-text);
+            border-color: var(--theme-border);
+        }
+
+        body.theme-dark input::placeholder,
+        body.theme-dark textarea::placeholder {
+            color: #8194b0;
+        }
+
+        body.theme-dark .shadow-sm,
+        body.theme-dark .shadow-md,
+        body.theme-dark .shadow-lg,
+        body.theme-dark .shadow-2xl {
+            box-shadow: 0 14px 30px rgba(2, 8, 23, 0.45) !important;
+        }
+
+        body.theme-dark .bg-green-100 {
+            background-color: rgba(89, 172, 119, 0.18) !important;
+        }
+
+        body.theme-dark .text-green-800 {
+            color: #8fe3ad !important;
+        }
+
+        body.theme-dark .bg-gray-100 {
+            background-color: rgba(159, 176, 200, 0.12) !important;
+        }
+
+        .theme-toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 9999px;
+            padding: 0.38rem 0.72rem;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.08);
+            font-size: 0.82rem;
+            line-height: 1;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle-btn:hover {
+            border-color: rgba(89, 172, 119, 0.55);
+            color: #9df0bb;
+        }
+
+        .theme-toggle-mobile-btn {
+            padding: 0.38rem;
+        }
+
         /* Liquid Glass Navigation Bar (Global Injection) */
         nav.liquid-glass {
             background: rgba(0, 0, 0, 0.3);
@@ -138,6 +302,23 @@ export function injectLayout() {
         nav.liquid-glass .text-green-600 { /* Logo Text */
             color: #59AC77;
         }
+
+        body.theme-light nav.liquid-glass {
+            background: rgba(255, 255, 255, 0.85);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        body.theme-light nav.liquid-glass a,
+        body.theme-light #menu-btn,
+        body.theme-light .theme-toggle-btn {
+            color: #0f172a;
+        }
+
+        body.theme-light .theme-toggle-btn {
+            border-color: rgba(148, 163, 184, 0.45);
+            background: rgba(241, 245, 249, 0.9);
+        }
         
         /* Mobile Menu Override */
         #mobile-menu {
@@ -161,6 +342,8 @@ export function injectLayout() {
     // Initialize Layout Scripts
     setTimeout(() => {
         setupMobileMenu();
+        setupThemeToggle();
+        updateThemeToggleUI();
         if (typeof feather !== 'undefined') feather.replace();
         if (typeof AOS !== 'undefined') AOS.init();
 
@@ -205,6 +388,51 @@ function setupMobileMenu() {
             if (isMenuOpen) toggleMenu();
         });
     });
+}
+
+function getInitialTheme() {
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
+    return 'dark';
+}
+
+function applyTheme(theme) {
+    document.body.classList.remove('theme-dark', 'theme-light');
+    document.body.classList.add(theme === 'light' ? 'theme-light' : 'theme-dark');
+}
+
+function updateThemeToggleUI() {
+    const isDark = document.body.classList.contains('theme-dark');
+    const desktopLabel = document.getElementById('theme-toggle-desktop-label');
+    const desktopBtn = document.getElementById('theme-toggle-desktop');
+    const mobileBtn = document.getElementById('theme-toggle-mobile');
+    const nextThemeText = isDark ? 'Light' : 'Dark';
+    const iconName = isDark ? 'sun' : 'moon';
+
+    if (desktopLabel) desktopLabel.textContent = nextThemeText;
+    if (desktopBtn) {
+        desktopBtn.setAttribute('aria-label', `Switch to ${nextThemeText.toLowerCase()} theme`);
+        desktopBtn.innerHTML = `<i data-feather="${iconName}" class="w-4 h-4"></i><span id="theme-toggle-desktop-label">${nextThemeText}</span>`;
+    }
+    if (mobileBtn) {
+        mobileBtn.setAttribute('aria-label', `Switch to ${nextThemeText.toLowerCase()} theme`);
+        mobileBtn.innerHTML = `<i data-feather="${iconName}" class="w-4 h-4"></i>`;
+    }
+}
+
+function setupThemeToggle() {
+    const desktopBtn = document.getElementById('theme-toggle-desktop');
+    const mobileBtn = document.getElementById('theme-toggle-mobile');
+    const toggleTheme = () => {
+        const nextTheme = document.body.classList.contains('theme-dark') ? 'light' : 'dark';
+        applyTheme(nextTheme);
+        localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+        updateThemeToggleUI();
+        if (typeof feather !== 'undefined') feather.replace();
+    };
+
+    desktopBtn?.addEventListener('click', toggleTheme);
+    mobileBtn?.addEventListener('click', toggleTheme);
 }
 
 function updateAuthUI(user) {
