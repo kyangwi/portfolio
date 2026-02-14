@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Wizard | Bwenge Kyangwi</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <script type="module">
+        import { injectLayout } from './js/layout.js';
+        injectLayout();
+    </script>
+    <style>
+        .ql-container {
+            font-size: 16px;
+            min-height: 260px;
+        }
+
+        .ql-editor {
+            min-height: 260px;
+        }
+
+        .wizard-step {
+            display: none;
+        }
+
+        .wizard-step.active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body class="font-sans antialiased text-gray-800 flex flex-col min-h-screen bg-gray-50">
+    <main class="flex-1 pt-32 pb-16 px-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="bg-white p-8 rounded-xl shadow-sm">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold mb-2">Course Creation Wizard</h1>
+                    <p class="text-gray-500 mb-4">Create structured courses with chapters and blog-style topic notes.</p>
+                    <div class="grid grid-cols-3 gap-3 text-sm">
+                        <div id="step-indicator-1" class="rounded-lg px-3 py-2 bg-blue-600 text-white">1. Basics</div>
+                        <div id="step-indicator-2" class="rounded-lg px-3 py-2 bg-gray-200 text-gray-700">2. Structure</div>
+                        <div id="step-indicator-3" class="rounded-lg px-3 py-2 bg-gray-200 text-gray-700">3. Publish</div>
+                    </div>
+                </div>
+
+                <section id="step-1" class="wizard-step active">
+                    <input type="text" id="course-title"
+                        class="w-full text-4xl font-bold border-0 border-b-2 border-transparent focus:border-blue-500 focus:ring-0 outline-none mb-4 placeholder-gray-400 p-2 transition"
+                        placeholder="Course Title">
+
+                    <textarea id="course-description"
+                        class="w-full text-lg text-gray-600 border border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none mb-4 placeholder-gray-400 resize-none transition"
+                        rows="2" placeholder="Short course description"></textarea>
+
+                    <input type="url" id="more-info-link"
+                        class="w-full text-base text-gray-700 border border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none mb-6 placeholder-gray-400 transition"
+                        placeholder="More information link (https://...)">
+
+                    <div class="mb-8 p-4 border rounded-lg bg-gray-50">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Featured Image</label>
+                        <input type="file" id="featured-image-input" accept="image/*"
+                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        <div id="featured-image-preview"
+                            class="mt-4 hidden relative w-full h-64 bg-gray-200 rounded-lg overflow-hidden">
+                            <img src="" class="w-full h-full object-cover" alt="Course image preview">
+                            <button id="remove-image-btn"
+                                class="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md hover:bg-red-50 text-red-600">
+                                <i data-feather="x" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-8">
+                        <h2 class="text-xl font-bold mb-3">Course Overview (Blog-style editor)</h2>
+                        <div id="course-overview-editor" class="bg-white border border-gray-200 rounded-lg"></div>
+                    </div>
+                </section>
+
+                <section id="step-2" class="wizard-step">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <h2 class="text-xl font-bold">Chapters (Foldable)</h2>
+                                <button type="button" id="add-chapter-btn"
+                                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">+ Add Chapter</button>
+                            </div>
+                            <div id="chapters-list" class="space-y-3"></div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                            <h3 class="font-semibold text-lg mb-3">Selected Topic Editor</h3>
+                            <p id="topic-editor-hint" class="text-sm text-gray-500 mb-3">Pick a chapter/topic from the left.</p>
+
+                            <div class="mb-3">
+                                <input id="topic-title" type="text" class="w-full border border-gray-300 rounded-lg p-2"
+                                    placeholder="Topic title">
+                            </div>
+                            <div class="mb-3">
+                                <textarea id="topic-description" rows="2" class="w-full border border-gray-300 rounded-lg p-2"
+                                    placeholder="Topic short description"></textarea>
+                            </div>
+                            <div id="topic-content-editor" class="bg-white border border-gray-200 rounded-lg mb-3"></div>
+                            <div class="flex gap-3">
+                                <button type="button" id="add-topic-btn"
+                                    class="px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-900 transition">+ Add Topic</button>
+                                <button type="button" id="delete-topic-btn"
+                                    class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">Delete Topic</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="step-3" class="wizard-step">
+                    <h2 class="text-2xl font-bold mb-4">Review and Publish</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <div class="bg-gray-100 rounded-lg p-4">
+                            <p class="text-sm text-gray-500">Course Title</p>
+                            <p id="review-title" class="font-semibold">-</p>
+                        </div>
+                        <div class="bg-gray-100 rounded-lg p-4">
+                            <p class="text-sm text-gray-500">Chapters</p>
+                            <p id="review-chapters" class="font-semibold">0</p>
+                        </div>
+                        <div class="bg-gray-100 rounded-lg p-4">
+                            <p class="text-sm text-gray-500">Topics</p>
+                            <p id="review-topics" class="font-semibold">0</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-500">Save as draft or publish when ready.</p>
+                </section>
+
+                <div class="flex justify-between mt-10">
+                    <button type="button" id="prev-step-btn"
+                        class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
+                        Back
+                    </button>
+                    <div class="flex gap-3">
+                        <button type="button" id="next-step-btn"
+                            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                            Next
+                        </button>
+                        <button type="button" id="save-draft-btn"
+                            class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition hidden">
+                            Save Draft
+                        </button>
+                        <button type="button" id="publish-btn"
+                            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition hidden">
+                            Publish
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="./js/course_editor.js"></script>
+</body>
+
+</html>

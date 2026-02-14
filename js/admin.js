@@ -1,5 +1,15 @@
 import { getCurrentUser } from './auth.js';
-import { getAllProjects, getAllBlogs, getAchievements, deleteProject, deleteBlogPost, deleteAchievement } from './db.js';
+import {
+    getAllProjects,
+    getAllBlogs,
+    getAchievements,
+    getAllCourses,
+    getCourseAccessUsers,
+    deleteProject,
+    deleteBlogPost,
+    deleteAchievement,
+    deleteCourse
+} from './db.js';
 
 async function init() {
     const user = await getCurrentUser();
@@ -16,6 +26,8 @@ async function init() {
 function setupActions() {
     document.getElementById('add-project-btn').addEventListener('click', () => window.location.href = '/project_editor.html');
     document.getElementById('add-blog-btn').addEventListener('click', () => window.location.href = '/editor.html');
+    const addCourseBtn = document.getElementById('add-course-btn');
+    if (addCourseBtn) addCourseBtn.addEventListener('click', () => window.location.href = '/course_editor.html');
     // We need keys for these new buttons if they exist in HTML
     const addAchBtn = document.getElementById('add-ach-btn');
     if (addAchBtn) addAchBtn.addEventListener('click', () => window.location.href = '/achievement_editor.html');
@@ -45,6 +57,13 @@ window.handleDeleteAchievement = async (id) => {
     }
 };
 
+window.handleDeleteCourse = async (id) => {
+    if (confirm("Delete Course?")) {
+        await deleteCourse(id);
+        loadDashboardData();
+    }
+};
+
 
 function setupTabs() {
     const tabs = document.querySelectorAll('[data-tab]');
@@ -68,30 +87,22 @@ function setupTabs() {
 }
 
 async function loadDashboardData() {
-    const [projects, blogs, achievements] = await Promise.all([
+    const [projects, blogs, achievements, courses, courseAccessUsers] = await Promise.all([
         getAllProjects(),
         getAllBlogs(),
-        getAchievements()
+        getAchievements(),
+        getAllCourses(),
+        getCourseAccessUsers()
     ]);
 
     // Update Stats
     document.getElementById('stat-projects').textContent = projects.length;
 
-    // Count published vs draft blogs if needed, or just total. 
-    // Since getRecentBlogs implementation in db.js only returning published for index_data, 
-    // but getAllBlogs in admin fetches status, we can filter here.
-    const publishedBlogs = blogs.filter(b => b.status === 'published').length;
     document.getElementById('stat-blogs').textContent = blogs.length; // Total blogs
 
-    // Reusing the third stat card for Achievements
-    // Ideally we should rename the HTML ID from 'stat-drafts' to 'stat-achievements' in admin.html,
-    // but changing ID here works if we change label in HTML too. 
-    // For now, I'll update text content.
-    document.getElementById('stat-drafts').textContent = achievements.length;
-
-    // Check if we can update the label of the third card via JS or if I should edit HTML
-    const draftsLabel = document.getElementById('label-drafts'); // I need to add this ID to HTML or navigate DOM
-    // Let's assume I edits HTML next.
+    document.getElementById('stat-courses').textContent = courses.length;
+    document.getElementById('stat-achievements').textContent = achievements.length;
+    document.getElementById('stat-course-users').textContent = courseAccessUsers.length;
 
     // Render Projects Table
     const projectsTable = document.getElementById('projects-table-body');
@@ -156,6 +167,33 @@ async function loadDashboardData() {
                 <a href="/achievement_editor.html?id=${a.id}" class="text-blue-600 hover:text-blue-900 mr-3">Edit</a>
                 <a href="#" onclick="handleDeleteAchievement('${a.id}'); return false;" class="text-red-600 hover:text-red-900">Delete</a>
             </td>
+        </tr>`).join('');
+    }
+
+    const coursesTable = document.getElementById('courses-table-body');
+    if (coursesTable) {
+        coursesTable.innerHTML = courses.map(c => `
+        <tr>
+            <td class="px-6 py-4 whitespace-nowrap"><div class="text-sm font-medium text-gray-900">${c.title || '-'}</div></td>
+            <td class="px-6 py-4 whitespace-nowrap"><div class="text-sm text-gray-500">${Array.isArray(c.chapters) ? c.chapters.length : 0}</div></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${c.published_at || c.created_at ? new Date(c.published_at || c.created_at).toLocaleDateString() : '-'}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <a href="/course_editor.html?id=${c.id}" class="text-blue-600 hover:text-blue-900 mr-3">Edit</a>
+                <a href="#" onclick="handleDeleteCourse('${c.id}'); return false;" class="text-red-600 hover:text-red-900">Delete</a>
+            </td>
+        </tr>`).join('');
+    }
+
+    const courseAccessTable = document.getElementById('course-access-table-body');
+    if (courseAccessTable) {
+        courseAccessTable.innerHTML = courseAccessUsers.map(u => `
+        <tr>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900">${u.display_name || u.email || u.uid}</div>
+                <div class="text-xs text-gray-500">${u.email || '-'}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${u.first_access_at ? new Date(u.first_access_at).toLocaleString() : '-'}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${u.last_access_at ? new Date(u.last_access_at).toLocaleString() : '-'}</td>
         </tr>`).join('');
     }
 }

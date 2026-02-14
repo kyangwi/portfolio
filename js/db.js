@@ -85,6 +85,7 @@ function invalidatePostCaches(...keys) {
 // Update keys to v2 to force refresh
 function invalidateProjects() { invalidateCache('cache_v2_projects'); }
 function invalidateBlogs() { invalidateCache('cache_v2_blogs'); }
+function invalidateCourses() { invalidateCache('cache_v2_courses'); }
 function invalidateAchievements() { invalidateCache('cache_v2_achievements'); }
 function invalidateCVProfile() { invalidateCache('cache_v2_cv_profile'); }
 function invalidateSkills() { invalidateCache('cache_v2_cv_skills'); }
@@ -267,6 +268,134 @@ export async function deleteBlogPost(id) {
     await deleteDoc(docRef);
     invalidateBlogs();
     invalidatePostCaches(id, existingPostId);
+}
+
+// --- Courses ---
+
+async function fetchAllCoursesRaw() {
+    const q = query(collection(db, "courses"));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(normalizeFirestoreData);
+}
+
+export async function getAllCourses() {
+    const courses = await cachedFetch('cache_v2_courses', fetchAllCoursesRaw);
+    return courses.sort((a, b) => {
+        const dateA = new Date(a.created_at || 0);
+        const dateB = new Date(b.created_at || 0);
+        return dateB - dateA;
+    });
+}
+
+export async function getCourse(id, bypassCache = false) {
+    if (bypassCache) {
+        try {
+            const docRef = doc(db, "courses", id);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) return normalizeFirestoreData(docSnap);
+        } catch (e) {
+            // Continue to slug fallback
+        }
+
+        const q = query(collection(db, "courses"), where("course_id", "==", id));
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) return normalizeFirestoreData(snapshot.docs[0]);
+        return null;
+    }
+
+    return cachedFetch(`cache_course_${id}`, async () => {
+        try {
+            const docRef = doc(db, "courses", id);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) return { id: docSnap.id, ...docSnap.data() };
+        } catch (e) {
+            // Continue to slug fallback
+        }
+
+        const q = query(collection(db, "courses"), where("course_id", "==", id));
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+            return { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
+        }
+        return null;
+    });
+}
+
+export async function addCourse(data) {
+    if (!data.course_id && data.title) {
+        data.course_id = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    }
+
+    const docRef = await addDoc(collection(db, "courses"), {
+        ...data,
+        created_at: serverTimestamp(),
+        updated_at: serverTimestamp()
+    });
+    invalidateCourses();
+    return docRef.id;
+}
+
+export async function updateCourse(id, data) {
+    const docRef = doc(db, "courses", id);
+    const existingSnap = await getDoc(docRef);
+    const existingCourseId = existingSnap.exists() ? existingSnap.data().course_id : null;
+    const nextCourseId = typeof data?.course_id === 'string' ? data.course_id : null;
+
+    await updateDoc(docRef, {
+        ...data,
+        updated_at: serverTimestamp()
+    });
+    invalidateCourses();
+    invalidateCache(`cache_course_${id}`);
+    if (existingCourseId) invalidateCache(`cache_course_${existingCourseId}`);
+    if (nextCourseId) invalidateCache(`cache_course_${nextCourseId}`);
+}
+
+export async function deleteCourse(id) {
+    const docRef = doc(db, "courses", id);
+    const existingSnap = await getDoc(docRef);
+    const existingCourseId = existingSnap.exists() ? existingSnap.data().course_id : null;
+
+    await deleteDoc(docRef);
+    invalidateCourses();
+    invalidateCache(`cache_course_${id}`);
+    if (existingCourseId) invalidateCache(`cache_course_${existingCourseId}`);
+}
+
+export async function logCourseAccess(user) {
+    if (!user?.uid) return;
+
+    const accessRef = doc(db, "course_access_users", user.uid);
+    const existing = await getDoc(accessRef);
+
+    const payload = {
+        uid: user.uid,
+        email: user.email || '',
+        display_name: user.displayName || '',
+        last_access_at: serverTimestamp()
+    };
+
+    if (existing.exists()) {
+        await setDoc(accessRef, payload, { merge: true });
+        return;
+    }
+
+    await setDoc(accessRef, {
+        ...payload,
+        first_access_at: serverTimestamp()
+    }, { merge: true });
+}
+
+export async function getCourseAccessUsers() {
+    const q = query(collection(db, "course_access_users"));
+    const snapshot = await getDocs(q);
+    return snapshot.docs
+        .map(normalizeFirestoreData)
+        .sort((a, b) => {
+            const dateA = new Date(a.last_access_at || a.first_access_at || 0);
+            const dateB = new Date(b.last_access_at || b.first_access_at || 0);
+            return dateB - dateA;
+        });
 }
 
 

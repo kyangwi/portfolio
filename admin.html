@@ -33,11 +33,14 @@
                 <button id="add-blog-btn"
                     class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">Add Blog
                     Post</button>
+                <button id="add-course-btn"
+                    class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">Add
+                    Course</button>
             </div>
         </div>
 
         <!-- Stats Overview -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-12">
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <h3 class="text-gray-500 text-sm font-medium mb-1">Total Projects</h3>
                 <p class="text-3xl font-bold" id="stat-projects">-</p>
@@ -47,8 +50,16 @@
                 <p class="text-3xl font-bold" id="stat-blogs">-</p>
             </div>
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h3 class="text-gray-500 text-sm font-medium mb-1">Total Courses</h3>
+                <p class="text-3xl font-bold" id="stat-courses">-</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <h3 class="text-gray-500 text-sm font-medium mb-1">Achievements</h3>
-                <p class="text-3xl font-bold" id="stat-drafts">-</p>
+                <p class="text-3xl font-bold" id="stat-achievements">-</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h3 class="text-gray-500 text-sm font-medium mb-1">Course Users</h3>
+                <p class="text-3xl font-bold" id="stat-course-users">-</p>
             </div>
         </div>
 
@@ -68,6 +79,11 @@
                     <button
                         class="inline-block p-4 border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 rounded-t-lg"
                         data-tab="achievements">Achievements</button>
+                </li>
+                <li class="mr-2">
+                    <button
+                        class="inline-block p-4 border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 rounded-t-lg"
+                        data-tab="courses">Courses</button>
                 </li>
                 <li class="mr-2">
                     <button
@@ -159,6 +175,60 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200" id="achievements-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Courses Tab -->
+            <div id="courses-tab" class="hidden space-y-6">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold">Courses</h3>
+                    </div>
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Title</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Chapters</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Date</th>
+                                <th
+                                    class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="courses-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold">Users Who Accessed Courses</h3>
+                    </div>
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    User</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    First Access</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Last Access</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="course-access-table-body">
                             <!-- Populated by JS -->
                         </tbody>
                     </table>

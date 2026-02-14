@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Course | Bwenge Kyangwi</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+
+    <script type="module">
+        import { injectLayout } from './js/layout.js';
+        injectLayout();
+    </script>
+    <style>
+        .prose {
+            color: #cbd5e1;
+            max-width: 65ch;
+            margin: 0 auto;
+        }
+
+        .prose a {
+            color: #93c5fd;
+            text-decoration: underline;
+        }
+
+        .prose strong {
+            color: #f8fafc;
+            font-weight: 600;
+        }
+
+        .prose h1,
+        .prose h2,
+        .prose h3 {
+            color: #f1f5f9;
+            font-weight: 700;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+
+        .prose p {
+            margin: 1em 0;
+            line-height: 1.75;
+        }
+
+        .prose pre {
+            background: #1e1e1e;
+            border: 1px solid #2d2d2d;
+            padding: 1rem 1.25rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            margin: 1.5em 0;
+            position: relative;
+        }
+
+        .prose pre code {
+            background: transparent;
+            color: #d4d4d4;
+            padding: 0;
+            display: block;
+        }
+    </style>
+</head>
+
+<body class="font-sans antialiased text-gray-800 flex flex-col min-h-screen overflow-x-hidden">
+    <main class="flex-1">
+        <article class="pt-32 pb-16 bg-transparent">
+            <div class="max-w-4xl mx-auto px-4" id="course-container">
+                <div class="text-center py-20 text-slate-400">Loading course...</div>
+            </div>
+        </article>
+    </main>
+
+    <script type="module" src="./js/course_post.js"></script>
+</body>
+
+</html>

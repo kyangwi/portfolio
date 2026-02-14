@@ -18,6 +18,7 @@ const navbarHTML = `
                 <a href="/#achievements" class="text-white hover:text-green-600 transition">Achievements</a>
                 <a href="/#contact" class="text-white hover:text-green-600 transition">Contact</a>
                 <a href="/blog.html" class="text-white hover:text-green-600 transition">Blog</a>
+                <a href="/courses.html" class="text-white hover:text-green-600 transition">Courses</a>
                 <button id="theme-toggle-desktop" class="theme-toggle-btn" type="button" aria-label="Switch theme">
                     <i data-feather="sun" class="w-4 h-4"></i>
                     <span id="theme-toggle-desktop-label">Light</span>
@@ -59,6 +60,9 @@ const navbarHTML = `
                 </a>
                 <a href="/blog.html" class="block px-4 py-3 rounded-lg text-base font-medium text-white hover:text-green-400 hover:bg-white/5 transition flex items-center">
                     <i data-feather="edit-3" class="w-5 h-5 mr-3"></i> Blog
+                </a>
+                <a href="/courses.html" class="block px-4 py-3 rounded-lg text-base font-medium text-white hover:text-green-400 hover:bg-white/5 transition flex items-center">
+                    <i data-feather="book-open" class="w-5 h-5 mr-3"></i> Courses
                 </a>
                 <div id="auth-mobile"></div>
             </div>

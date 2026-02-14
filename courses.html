@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courses | Bwenge Kyangwi</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+
+    <script type="module">
+        import { injectLayout } from './js/layout.js';
+        injectLayout();
+    </script>
+    <style>
+        .text-gradient {
+            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+
+<body class="font-sans antialiased text-gray-800 flex flex-col min-h-screen overflow-x-hidden">
+    <main class="flex-1">
+        <section class="pt-32 pb-16 px-4 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 border-b border-slate-800">
+            <div class="max-w-7xl mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4 text-white">Learning <span class="text-gradient">Courses</span></h1>
+                <p class="text-xl text-slate-300 max-w-3xl mx-auto">Access structured notes by chapter. Login is required.</p>
+            </div>
+        </section>
+
+        <div class="min-h-screen bg-slate-950/40 pt-12 pb-12">
+            <div class="max-w-screen-2xl mx-auto px-4">
+                <div id="courses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <p class="text-center col-span-3 text-slate-400">Loading courses...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="./js/courses.js"></script>
+</body>
+
+</html>
