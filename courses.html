@@ -30,7 +30,7 @@
     </script>
     <style>
         .text-gradient {
-            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+            background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -40,20 +40,46 @@
 
 <body class="font-sans antialiased text-gray-800 flex flex-col min-h-screen overflow-x-hidden">
     <main class="flex-1">
-        <section class="pt-32 pb-16 px-4 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 border-b border-slate-800">
-            <div class="max-w-7xl mx-auto text-center">
-                <h1 class="text-4xl md:text-5xl font-bold mb-4 text-white">Learning <span class="text-gradient">Courses</span></h1>
-                <p class="text-xl text-slate-300 max-w-3xl mx-auto">Access structured notes by chapter. Login is required.</p>
+        <section class="pt-32 pb-16 px-4 bg-gradient-to-br from-slate-900 via-emerald-900 to-slate-900 border-b border-slate-800">
+            <div class="max-w-7xl mx-auto">
+                <p class="text-emerald-300 uppercase tracking-[0.2em] text-xs mb-3">Learning Hub</p>
+                <h1 class="text-4xl md:text-5xl font-bold mb-4 text-white">Courses In <span class="text-gradient">Structured Flow</span></h1>
+                <p class="text-lg text-slate-300 max-w-3xl">Browse multiple courses, expand chapters, and open notes styled like blog articles.</p>
             </div>
         </section>
 
-        <div class="min-h-screen bg-slate-950/40 pt-12 pb-12">
-            <div class="max-w-screen-2xl mx-auto px-4">
-                <div id="courses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <p class="text-center col-span-3 text-slate-400">Loading courses...</p>
+        <section class="bg-slate-950/40 py-10 px-4">
+            <div class="max-w-screen-2xl mx-auto">
+                <div class="mb-8">
+                    <h2 class="text-xl font-semibold text-slate-100 mb-3">All Courses</h2>
+                    <div id="courses-strip" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                        <p class="text-slate-400">Loading courses...</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <aside class="lg:col-span-4 bg-slate-900/80 border border-slate-700 rounded-xl p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-slate-100">Course Structure</h3>
+                            <span id="structure-count" class="text-xs px-2 py-1 rounded bg-slate-800 text-slate-300">0 chapters</span>
+                        </div>
+                        <div id="chapters-tree" class="space-y-3">
+                            <p class="text-slate-400 text-sm">Choose a course to see chapters.</p>
+                        </div>
+                    </aside>
+
+                    <section class="lg:col-span-8">
+                        <div class="bg-slate-900/80 border border-slate-700 rounded-xl p-5 mb-4">
+                            <h3 id="notes-header" class="text-xl font-bold text-slate-100">Notes</h3>
+                            <p id="notes-subheader" class="text-slate-400 text-sm mt-1">Select a chapter to view its notes.</p>
+                        </div>
+                        <div id="notes-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <p class="text-slate-400">No chapter selected.</p>
+                        </div>
+                    </section>
                 </div>
             </div>
-        </div>
+        </section>
     </main>
 
     <script type="module" src="./js/courses.js"></script>

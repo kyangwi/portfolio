@@ -61,7 +61,7 @@
                     <h1 class="text-3xl font-bold mb-2">Course Creation Wizard</h1>
                     <p class="text-gray-500 mb-4">Create structured courses with chapters and blog-style topic notes.</p>
                     <div class="grid grid-cols-3 gap-3 text-sm">
-                        <div id="step-indicator-1" class="rounded-lg px-3 py-2 bg-blue-600 text-white">1. Basics</div>
+                        <div id="step-indicator-1" class="rounded-lg px-3 py-2 bg-green-600 text-white">1. Basics</div>
                         <div id="step-indicator-2" class="rounded-lg px-3 py-2 bg-gray-200 text-gray-700">2. Structure</div>
                         <div id="step-indicator-3" class="rounded-lg px-3 py-2 bg-gray-200 text-gray-700">3. Publish</div>
                     </div>
@@ -69,21 +69,21 @@
 
                 <section id="step-1" class="wizard-step active">
                     <input type="text" id="course-title"
-                        class="w-full text-4xl font-bold border-0 border-b-2 border-transparent focus:border-blue-500 focus:ring-0 outline-none mb-4 placeholder-gray-400 p-2 transition"
+                        class="w-full text-4xl font-bold border-0 border-b-2 border-transparent focus:border-green-500 focus:ring-0 outline-none mb-4 placeholder-gray-400 p-2 transition"
                         placeholder="Course Title">
 
                     <textarea id="course-description"
-                        class="w-full text-lg text-gray-600 border border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none mb-4 placeholder-gray-400 resize-none transition"
+                        class="w-full text-lg text-gray-600 border border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none mb-4 placeholder-gray-400 resize-none transition"
                         rows="2" placeholder="Short course description"></textarea>
 
                     <input type="url" id="more-info-link"
-                        class="w-full text-base text-gray-700 border border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none mb-6 placeholder-gray-400 transition"
+                        class="w-full text-base text-gray-700 border border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none mb-6 placeholder-gray-400 transition"
                         placeholder="More information link (https://...)">
 
                     <div class="mb-8 p-4 border rounded-lg bg-gray-50">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Featured Image</label>
                         <input type="file" id="featured-image-input" accept="image/*"
-                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
                         <div id="featured-image-preview"
                             class="mt-4 hidden relative w-full h-64 bg-gray-200 rounded-lg overflow-hidden">
                             <img src="" class="w-full h-full object-cover" alt="Course image preview">
@@ -106,7 +106,7 @@
                             <div class="flex items-center justify-between mb-3">
                                 <h2 class="text-xl font-bold">Chapters (Foldable)</h2>
                                 <button type="button" id="add-chapter-btn"
-                                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">+ Add Chapter</button>
+                                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">+ Add Chapter</button>
                             </div>
                             <div id="chapters-list" class="space-y-3"></div>
                         </div>
@@ -160,7 +160,7 @@
                     </button>
                     <div class="flex gap-3">
                         <button type="button" id="next-step-btn"
-                            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                            class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
                             Next
                         </button>
                         <button type="button" id="save-draft-btn"
@@ -168,7 +168,7 @@
                             Save Draft
                         </button>
                         <button type="button" id="publish-btn"
-                            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition hidden">
+                            class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition hidden">
                             Publish
                         </button>
                     </div>

@@ -182,7 +182,7 @@ function renderChaptersList() {
                 <div class="space-y-2">
                     ${chapter.topics.map((topic, tIndex) => `
                     <button type="button" data-action="select-topic" data-cindex="${cIndex}" data-tindex="${tIndex}"
-                        class="w-full text-left px-3 py-2 rounded-lg border ${state.selectedChapterIndex === cIndex && state.selectedTopicIndex === tIndex ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-gray-50'}">
+                        class="w-full text-left px-3 py-2 rounded-lg border ${state.selectedChapterIndex === cIndex && state.selectedTopicIndex === tIndex ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-gray-50'}">
                         <p class="font-medium">${topic.title || 'Untitled Topic'}</p>
                         <p class="text-xs text-gray-500">${topic.description || 'No description'}</p>
                     </button>`).join('')}
@@ -308,7 +308,7 @@ function goToStep(step) {
         const active = n === clamped;
         stepEl.classList.toggle('active', active);
         indicator.className = active
-            ? 'rounded-lg px-3 py-2 bg-blue-600 text-white'
+            ? 'rounded-lg px-3 py-2 bg-green-600 text-white'
             : 'rounded-lg px-3 py-2 bg-gray-200 text-gray-700';
     });
 

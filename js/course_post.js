@@ -80,6 +80,11 @@ function renderCourse(course) {
     const container = document.getElementById('course-container');
     const overview = normalizeRichContent(course.content);
     const chapters = normalizeCourseChapters(course.chapters);
+    const params = new URLSearchParams(window.location.search);
+    const selectedChapter = Number(params.get('chapter'));
+    const selectedTopic = Number(params.get('topic'));
+    const hasChapterParam = Number.isInteger(selectedChapter) && selectedChapter >= 0;
+    const hasTopicParam = Number.isInteger(selectedTopic) && selectedTopic >= 0;
 
     container.innerHTML = `
         <div class="text-center mb-8">
@@ -103,21 +108,24 @@ function renderCourse(course) {
 
         <section class="space-y-4 mb-8">
             ${chapters.map((chapter, cIndex) => `
-            <details class="bg-slate-900/80 border border-slate-700 rounded-xl p-5" ${cIndex === 0 ? 'open' : ''}>
+            <details id="chapter-${cIndex}" class="bg-slate-900/80 border border-slate-700 rounded-xl p-5" ${(hasChapterParam ? cIndex === selectedChapter : cIndex === 0) ? 'open' : ''}>
                 <summary class="cursor-pointer flex items-center justify-between text-slate-100 font-semibold text-xl">
                     <span>Chapter ${cIndex + 1}: ${escapeHtml(chapter.title || 'Untitled Chapter')}</span>
                     <span class="text-sm text-slate-400">${(chapter.topics || []).length} topics</span>
                 </summary>
                 <div class="mt-5 space-y-5">
                     ${(chapter.topics || []).map((topic, tIndex) => `
-                    <article class="border border-slate-700 rounded-xl p-5 bg-slate-950/50">
-                        <div class="mb-3">
-                            <h3 class="text-2xl font-bold text-slate-100">Topic ${tIndex + 1}: ${escapeHtml(topic.title || 'Untitled Topic')}</h3>
-                            ${topic.description ? `<p class="text-slate-400 mt-1">${escapeHtml(topic.description)}</p>` : ''}
-                            <p class="text-slate-500 text-sm mt-1">${topic.read_time || 1} min read</p>
-                        </div>
-                        <div class="prose prose-lg max-w-none">${normalizeRichContent(topic.content || '')}</div>
-                    </article>
+                    <details id="topic-${cIndex}-${tIndex}" class="border rounded-xl p-5 ${hasChapterParam && hasTopicParam && cIndex === selectedChapter && tIndex === selectedTopic ? 'border-emerald-400 bg-emerald-950/20' : 'border-slate-700 bg-slate-950/50'}"
+                        ${(hasChapterParam && hasTopicParam && cIndex === selectedChapter && tIndex === selectedTopic) || (!hasChapterParam && cIndex === 0 && tIndex === 0) ? 'open' : ''}>
+                        <summary class="cursor-pointer list-none">
+                            <div class="mb-1">
+                                <h3 class="text-2xl font-bold text-slate-100">Topic ${tIndex + 1}: ${escapeHtml(topic.title || 'Untitled Topic')}</h3>
+                                ${topic.description ? `<p class="text-slate-400 mt-1">${escapeHtml(topic.description)}</p>` : ''}
+                                <p class="text-slate-500 text-sm mt-1">${topic.read_time || 1} min read</p>
+                            </div>
+                        </summary>
+                        <div class="prose prose-lg max-w-none mt-4">${normalizeRichContent(topic.content || '')}</div>
+                    </details>
                     `).join('')}
                 </div>
             </details>
@@ -127,7 +135,7 @@ function renderCourse(course) {
         ${course.more_info_link ? `
         <div class="mt-10">
             <a href="${course.more_info_link}" target="_blank" rel="noopener noreferrer"
-               class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg transition">
+               class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-lg transition">
                 More Information <i data-feather="external-link" class="w-4 h-4 ml-2"></i>
             </a>
         </div>
@@ -139,6 +147,15 @@ function renderCourse(course) {
         container.querySelectorAll('.prose pre code').forEach((codeBlock) => {
             hljs.highlightElement(codeBlock);
         });
+    }
+
+    if (hasChapterParam && hasTopicParam) {
+        const el = document.getElementById(`topic-${selectedChapter}-${selectedTopic}`);
+        if (el) {
+            setTimeout(() => {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 120);
+        }
     }
 }
 
