@@ -2,6 +2,7 @@ import {
     getFeaturedProjects,
     getAllProjects, // Added for "last 6 uploaded"
     getRecentBlogs,
+    getAllCourses,
     getAchievements,
     getCVProfile,
     getSkills,
@@ -180,6 +181,61 @@ async function renderBlogGrid(blogs) {
     if (typeof feather !== 'undefined') feather.replace();
 }
 
+function normalizeCourseChapters(chapters) {
+    if (!Array.isArray(chapters)) return [];
+    return chapters.map((chapter) => {
+        if (Array.isArray(chapter.topics)) return chapter;
+        return {
+            ...chapter,
+            topics: [{ title: 'Notes' }]
+        };
+    });
+}
+
+async function renderCoursesHomeGrid(courses) {
+    const container = document.getElementById('courses-grid-home');
+    if (!container) return;
+
+    if (courses.length === 0) {
+        container.innerHTML = `
+        <div class="col-span-1 md:col-span-3 text-center py-12">
+            <p class="text-slate-400 text-lg">No courses available yet.</p>
+        </div>`;
+        return;
+    }
+
+    container.innerHTML = courses.map((course) => {
+        const chapters = normalizeCourseChapters(course.chapters);
+        const topics = chapters.reduce((sum, ch) => sum + (Array.isArray(ch.topics) ? ch.topics.length : 0), 0);
+        return `
+        <div class="bg-slate-900/80 border border-slate-700 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition duration-300" data-aos="fade-up">
+            <div class="relative overflow-hidden h-48 bg-slate-800">
+                ${course.image_base64
+                ? `<img src="${course.image_base64}" alt="${course.title}" class="w-full h-full object-cover hover:scale-105 transition duration-300">`
+                : `<div class="w-full h-full flex items-center justify-center"><i data-feather="book-open" class="text-slate-500 w-12 h-12"></i></div>`
+            }
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-transparent"></div>
+                <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+                    <span class="text-xs px-2 py-1 rounded bg-slate-900/80 text-slate-200">${formatDate(course.published_at || course.created_at)}</span>
+                </div>
+            </div>
+            <div class="p-6">
+                <h3 class="text-xl font-bold mb-2 line-clamp-1 text-slate-100">${course.title}</h3>
+                <p class="text-slate-300 mb-4 line-clamp-3">${course.description || ''}</p>
+                <div class="flex items-center gap-2 mb-4 text-xs">
+                    <span class="px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">${chapters.length} chapters</span>
+                    <span class="px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">${topics} notes</span>
+                </div>
+                <a href="/courses.html" class="inline-flex items-center text-emerald-400 hover:text-emerald-300 font-semibold">
+                    Open Courses <i data-feather="arrow-right" class="w-4 h-4 ml-2"></i>
+                </a>
+            </div>
+        </div>`;
+    }).join('');
+
+    if (typeof feather !== 'undefined') feather.replace();
+}
+
 async function renderProfileAndCV(profile, skills) {
     // 1. Profile Summary
     const summaryContainer = document.getElementById('profile-summary');
@@ -301,9 +357,10 @@ async function renderProfileAndCV(profile, skills) {
 // Main Init
 async function init() {
     try {
-        const [allProjects, blogs, achievements, profile, skills] = await Promise.all([
+        const [allProjects, blogs, allCourses, achievements, profile, skills] = await Promise.all([
             getAllProjects(), // User wants last uploaded projects
             getRecentBlogs(6), // User wants 6 blogs
+            getAllCourses(),
             getAchievements(),
             getCVProfile(),
             getSkills()
@@ -320,6 +377,7 @@ async function init() {
         await renderHeroBlog(blogs); // Already limited to 6, likely slice for hero inside renderHeroBlog logic uses [0]
         await renderProjectsGrid(recent6Projects);
         await renderBlogGrid(blogs);
+        await renderCoursesHomeGrid(allCourses.filter((c) => (c.status || 'draft') === 'published').slice(0, 6));
         await renderAchievements(achievements);
         await renderProfileAndCV(profile || {}, skills);
 
