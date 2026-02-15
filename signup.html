@@ -104,6 +104,19 @@
     <script type="module">
         import { signup } from './js/auth.js';
 
+        function getSafeNextPath() {
+            const params = new URLSearchParams(window.location.search);
+            const raw = params.get('next');
+            if (!raw || !raw.startsWith('/')) return '/admin.html';
+            return raw;
+        }
+
+        const nextPath = getSafeNextPath();
+        const loginLink = document.querySelector('a[href="/login.html"]');
+        if (loginLink && nextPath !== '/admin.html') {
+            loginLink.href = `/login.html?next=${encodeURIComponent(nextPath)}`;
+        }
+
         document.getElementById('signup-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -124,7 +137,7 @@
 
             try {
                 await signup(email, password);
-                window.location.href = '/admin.html';
+                window.location.href = nextPath;
             } catch (error) {
                 console.error(error);
                 errorDiv.textContent = error.message;

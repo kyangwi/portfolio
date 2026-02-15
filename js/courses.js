@@ -199,7 +199,8 @@ function renderAll() {
 async function init() {
     const user = await getCurrentUser();
     if (!user) {
-        window.location.href = '/login.html';
+        const next = encodeURIComponent('/courses.html');
+        window.location.href = `/login.html?next=${next}`;
         return;
     }
 

@@ -162,7 +162,8 @@ function renderCourse(course) {
 async function init() {
     const user = await getCurrentUser();
     if (!user) {
-        window.location.href = '/login.html';
+        const next = encodeURIComponent(`${window.location.pathname}${window.location.search}`);
+        window.location.href = `/login.html?next=${next}`;
         return;
     }
 
