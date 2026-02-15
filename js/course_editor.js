@@ -181,11 +181,17 @@ function renderChaptersList() {
                 </div>
                 <div class="space-y-2">
                     ${chapter.topics.map((topic, tIndex) => `
-                    <button type="button" data-action="select-topic" data-cindex="${cIndex}" data-tindex="${tIndex}"
-                        class="w-full text-left px-3 py-2 rounded-lg border ${state.selectedChapterIndex === cIndex && state.selectedTopicIndex === tIndex ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-gray-50'}">
-                        <p class="font-medium">${topic.title || 'Untitled Topic'}</p>
-                        <p class="text-xs text-gray-500">${topic.description || 'No description'}</p>
-                    </button>`).join('')}
+                    <div class="flex items-start gap-2">
+                        <button type="button" data-action="select-topic" data-cindex="${cIndex}" data-tindex="${tIndex}"
+                            class="flex-1 text-left px-3 py-2 rounded-lg border ${state.selectedChapterIndex === cIndex && state.selectedTopicIndex === tIndex ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-gray-50'}">
+                            <p class="font-medium">${topic.title || 'Untitled Topic'}</p>
+                            <p class="text-xs text-gray-500">${topic.description || 'No description'}</p>
+                        </button>
+                        <button type="button" data-action="delete-topic-inline" data-cindex="${cIndex}" data-tindex="${tIndex}"
+                            class="shrink-0 text-xs px-2 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700" title="Delete topic">
+                            Delete
+                        </button>
+                    </div>`).join('')}
                 </div>
             </div>
         </details>
@@ -238,6 +244,31 @@ function renderChaptersList() {
             const tIndex = Number(e.currentTarget.dataset.tindex);
             state.selectedChapterIndex = cIndex;
             state.selectedTopicIndex = tIndex;
+            renderChaptersList();
+            loadSelectedTopicIntoEditor();
+        });
+    });
+
+    container.querySelectorAll('[data-action="delete-topic-inline"]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+            saveActiveTopicEditorToState();
+            const cIndex = Number(e.currentTarget.dataset.cindex);
+            const tIndex = Number(e.currentTarget.dataset.tindex);
+            const chapter = state.chapters[cIndex];
+            if (!chapter) return;
+
+            chapter.topics.splice(tIndex, 1);
+
+            if (state.selectedChapterIndex === cIndex) {
+                if (state.selectedTopicIndex === tIndex) {
+                    state.selectedTopicIndex = chapter.topics.length
+                        ? Math.min(tIndex, chapter.topics.length - 1)
+                        : -1;
+                } else if (state.selectedTopicIndex > tIndex) {
+                    state.selectedTopicIndex -= 1;
+                }
+            }
+
             renderChaptersList();
             loadSelectedTopicIntoEditor();
         });

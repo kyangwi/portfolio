@@ -17,6 +17,12 @@ function safeText(value) {
     return typeof value === 'string' ? value : '';
 }
 
+function getCourseImage(course) {
+    return typeof course?.image_base64 === 'string' && course.image_base64.trim().length > 0
+        ? course.image_base64
+        : '';
+}
+
 function normalizeCourseChapters(chapters) {
     if (!Array.isArray(chapters)) return [];
     return chapters.map((chapter) => {
@@ -60,12 +66,20 @@ function renderCoursesStrip() {
         const chapters = normalizeCourseChapters(course.chapters);
         const topicCount = chapters.reduce((sum, ch) => sum + (Array.isArray(ch.topics) ? ch.topics.length : 0), 0);
         const isActive = index === state.selectedCourseIndex;
+        const image = getCourseImage(course);
 
         return `
         <button data-course-index="${index}" class="text-left bg-slate-900/80 border rounded-xl p-5 transition ${isActive ? 'border-emerald-400 shadow-lg shadow-emerald-900/30' : 'border-slate-700 hover:border-slate-500'}">
-            <div class="flex items-center justify-between mb-2">
-                <h3 class="text-lg font-bold text-slate-100">${safeText(course.title)}</h3>
-                <span class="text-xs px-2 py-1 rounded bg-slate-800 text-slate-300">${formatDate(course.published_at || course.created_at)}</span>
+            <div class="relative h-32 mb-4 rounded-lg overflow-hidden border border-slate-700 bg-slate-800">
+                ${image
+                ? `<img src="${image}" alt="${safeText(course.title)}" class="w-full h-full object-cover">`
+                : `<div class="w-full h-full flex items-center justify-center"><i data-feather="image" class="w-8 h-8 text-slate-500"></i></div>`
+            }
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent"></div>
+                <div class="absolute bottom-2 left-3 right-3 flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-slate-100 line-clamp-1">${safeText(course.title)}</h3>
+                    <span class="text-[11px] px-2 py-1 rounded bg-slate-900/80 text-slate-200">${formatDate(course.published_at || course.created_at)}</span>
+                </div>
             </div>
             <p class="text-slate-400 text-sm line-clamp-2 mb-3">${safeText(course.description)}</p>
             <div class="flex gap-2 text-xs">
