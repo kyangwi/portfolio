@@ -42,6 +42,10 @@ function normalizeSource(source) {
     return '';
 }
 
+function stripAnsi(input) {
+    return (input || '').replace(/\u001b\[[0-9;]*m/g, '');
+}
+
 function formatInlineMarkdown(text) {
     let html = escapeHtml(text);
     html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
@@ -56,6 +60,10 @@ function markdownToHtml(markdownText) {
     const html = [];
     let paragraphBuffer = [];
     let inList = false;
+    let inOrderedList = false;
+    let inCodeFence = false;
+    let fenceLang = '';
+    let codeFenceBuffer = [];
 
     const flushParagraph = () => {
         if (paragraphBuffer.length === 0) return;
@@ -70,11 +78,47 @@ function markdownToHtml(markdownText) {
         inList = false;
     };
 
+    const closeOrderedList = () => {
+        if (!inOrderedList) return;
+        html.push('</ol>');
+        inOrderedList = false;
+    };
+
+    const flushCodeFence = () => {
+        if (!inCodeFence) return;
+        const langClass = fenceLang ? ` class="language-${escapeHtml(fenceLang)}"` : '';
+        html.push(`<pre><code${langClass}>${escapeHtml(codeFenceBuffer.join('\n'))}</code></pre>`);
+        inCodeFence = false;
+        fenceLang = '';
+        codeFenceBuffer = [];
+    };
+
     lines.forEach((line) => {
         const trimmed = line.trim();
+
+        const fenceMatch = trimmed.match(/^```([\w-]*)\s*$/);
+        if (fenceMatch) {
+            flushParagraph();
+            closeList();
+            closeOrderedList();
+            if (inCodeFence) {
+                flushCodeFence();
+            } else {
+                inCodeFence = true;
+                fenceLang = (fenceMatch[1] || '').toLowerCase();
+            }
+            return;
+        }
+
+        if (inCodeFence) {
+            codeFenceBuffer.push(line);
+            return;
+        }
+
         if (!trimmed) {
             flushParagraph();
             closeList();
+            closeOrderedList();
             return;
         }
 
@@ -82,6 +126,7 @@ function markdownToHtml(markdownText) {
         if (headingMatch) {
             flushParagraph();
             closeList();
+            closeOrderedList();
             const level = headingMatch[1].length;
             html.push(`<h${level}>${formatInlineMarkdown(headingMatch[2])}</h${level}>`);
             return;
@@ -90,6 +135,7 @@ function markdownToHtml(markdownText) {
         const listMatch = trimmed.match(/^[-*+]\s+(.*)$/);
         if (listMatch) {
             flushParagraph();
+            closeOrderedList();
             if (!inList) {
                 html.push('<ul>');
                 inList = true;
@@ -98,12 +144,36 @@ function markdownToHtml(markdownText) {
             return;
         }
 
+        const orderedMatch = trimmed.match(/^\d+\.\s+(.*)$/);
+        if (orderedMatch) {
+            flushParagraph();
+            closeList();
+            if (!inOrderedList) {
+                html.push('<ol>');
+                inOrderedList = true;
+            }
+            html.push(`<li>${formatInlineMarkdown(orderedMatch[1])}</li>`);
+            return;
+        }
+
+        const quoteMatch = trimmed.match(/^>\s?(.*)$/);
+        if (quoteMatch) {
+            flushParagraph();
+            closeList();
+            closeOrderedList();
+            html.push(`<blockquote>${formatInlineMarkdown(quoteMatch[1])}</blockquote>`);
+            return;
+        }
+
         closeList();
+        closeOrderedList();
         paragraphBuffer.push(trimmed);
     });
 
     flushParagraph();
     closeList();
+    closeOrderedList();
+    flushCodeFence();
     return html.join('');
 }
 
@@ -111,12 +181,13 @@ function renderNotebookOutput(output) {
     if (!output || typeof output !== 'object') return '';
 
     if (output.output_type === 'stream') {
-        return `<pre class="jp-output-stream"><code>${escapeHtml(normalizeSource(output.text))}</code></pre>`;
+        return `<pre class="jp-output-stream"><code>${escapeHtml(stripAnsi(normalizeSource(output.text)))}</code></pre>`;
     }
 
     if (output.output_type === 'error') {
         const traceback = Array.isArray(output.traceback) ? output.traceback.join('\n') : '';
-        return `<pre class="jp-output-error"><code>${escapeHtml(traceback || output.evalue || 'Execution error')}</code></pre>`;
+        const cleanedTrace = stripAnsi(traceback || output.evalue || 'Execution error');
+        return `<pre class="jp-output-error"><code>${escapeHtml(cleanedTrace)}</code></pre>`;
     }
 
     const data = output.data || {};
@@ -130,7 +201,13 @@ function renderNotebookOutput(output) {
         return `<div class="jp-output-markdown">${markdownToHtml(data['text/markdown'])}</div>`;
     }
     if (data['text/plain']) {
-        return `<pre class="jp-output-plain"><code>${escapeHtml(normalizeSource(data['text/plain']))}</code></pre>`;
+        return `<pre class="jp-output-plain"><code>${escapeHtml(stripAnsi(normalizeSource(data['text/plain'])))}</code></pre>`;
+    }
+    if (data['image/jpeg']) {
+        return `<img class="jp-output-image" src="data:image/jpeg;base64,${normalizeSource(data['image/jpeg'])}" alt="Notebook output image">`;
+    }
+    if (data['image/svg+xml']) {
+        return `<div class="jp-output-svg">${normalizeSource(data['image/svg+xml'])}</div>`;
     }
 
     return '';
@@ -138,7 +215,7 @@ function renderNotebookOutput(output) {
 
 function convertNotebookToHtml(notebook, fileName = 'notebook.ipynb') {
     const cells = Array.isArray(notebook?.cells) ? notebook.cells : [];
-    const language = notebook?.metadata?.language_info?.name || 'python';
+    const language = 'python';
 
     const renderedCells = cells.map((cell, index) => {
         const source = normalizeSource(cell.source);
