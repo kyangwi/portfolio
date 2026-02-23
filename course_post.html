@@ -124,12 +124,16 @@
             margin-top: 0.8rem;
             border-top: 1px dashed #334155;
             padding-top: 0.8rem;
+            max-width: 100%;
+            overflow-x: auto;
         }
 
         .prose .jp-output-stream,
         .prose .jp-output-plain,
         .prose .jp-output-error {
             margin: 0.5rem 0;
+            max-width: 100%;
+            overflow-x: auto;
         }
 
         .prose .jp-output-error code {
@@ -140,6 +144,109 @@
             max-width: 100%;
             border-radius: 0.5rem;
             border: 1px solid #334155;
+        }
+
+        .prose .jp-Cell,
+        .prose .jp-CodeCell,
+        .prose .jp-MarkdownCell {
+            border: 1px solid #334155;
+            border-radius: 0.6rem;
+            padding: 0.85rem;
+            margin: 0.9rem 0;
+            background: #020617;
+        }
+
+        .prose .jp-InputArea pre,
+        .prose .jp-OutputArea pre {
+            margin: 0.5rem 0;
+        }
+
+        .prose .jp-InputPrompt,
+        .prose .jp-OutputPrompt {
+            color: #94a3b8;
+            font-size: 0.75rem;
+        }
+
+        .prose .jp-RenderedHTMLCommon {
+            color: #cbd5e1;
+        }
+
+        .prose .jp-output-html,
+        .prose .jp-output-markdown,
+        .prose .jp-output-svg,
+        .prose .jp-OutputArea,
+        .prose .jp-OutputArea-output,
+        .prose .output_area,
+        .prose .output_subarea,
+        .prose .dataframe-container {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+        .prose .jp-output-html table,
+        .prose .jp-RenderedHTMLCommon table,
+        .prose .output_html table,
+        .prose .dataframe,
+        .prose table {
+            border-collapse: collapse;
+            width: max-content;
+            min-width: 100%;
+            table-layout: auto;
+            margin: 0.5rem 0;
+            font-size: 0.88rem;
+        }
+
+        .prose .jp-output-html th,
+        .prose .jp-output-html td,
+        .prose .jp-RenderedHTMLCommon th,
+        .prose .jp-RenderedHTMLCommon td,
+        .prose .output_html th,
+        .prose .output_html td,
+        .prose .dataframe th,
+        .prose .dataframe td,
+        .prose th,
+        .prose td {
+            border: 1px solid #334155;
+            padding: 0.45rem 0.6rem;
+            vertical-align: top;
+            white-space: nowrap;
+            color: #e2e8f0;
+        }
+
+        .prose .jp-output-html th,
+        .prose .jp-RenderedHTMLCommon th,
+        .prose .output_html th,
+        .prose .dataframe th,
+        .prose th {
+            background: #0f172a;
+            font-weight: 700;
+        }
+
+        .prose .jp-output-html caption,
+        .prose .jp-RenderedHTMLCommon caption,
+        .prose .output_html caption,
+        .prose .dataframe caption,
+        .prose caption {
+            caption-side: top;
+            color: #94a3b8;
+            text-align: left;
+            margin-bottom: 0.35rem;
+        }
+
+        .prose .jp-output-html img,
+        .prose .jp-RenderedHTMLCommon img,
+        .prose .output_html img,
+        .prose .jp-output-svg svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .prose .jp-outputs pre,
+        .prose .jp-OutputArea pre,
+        .prose .output_area pre {
+            max-width: 100%;
+            overflow-x: auto;
+            white-space: pre;
         }
     </style>
 </head>

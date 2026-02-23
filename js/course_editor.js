@@ -561,9 +561,10 @@ function bindImageHandlers() {
 function bindNotebookUploadHandlers() {
     const fileInput = byId('topic-notebook-input');
     const importBtn = byId('import-notebook-btn');
-    if (!fileInput || !importBtn) return;
+    const status = byId('notebook-import-status');
+    if (!fileInput || !importBtn || !status) return;
 
-    importBtn.addEventListener('click', async () => {
+    const importNotebook = async () => {
         if (state.selectedChapterIndex < 0 || state.selectedTopicIndex < 0) {
             alert('Select a topic first.');
             return;
@@ -580,10 +581,40 @@ function bindNotebookUploadHandlers() {
             return;
         }
 
+        importBtn.disabled = true;
+        importBtn.textContent = 'Importing...';
+        status.textContent = 'Converting notebook...';
+
         try {
-            const raw = await file.text();
-            const notebook = JSON.parse(raw);
-            const notebookHtml = convertNotebookToHtml(notebook, file.name);
+            let notebookHtml = '';
+            let convertedByBackend = false;
+
+            // Preferred path: backend nbconvert for high-fidelity output.
+            try {
+                const formData = new FormData();
+                formData.append('notebook', file);
+
+                const response = await fetch('/api/convert-notebook', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data?.html) {
+                        notebookHtml = data.html;
+                        convertedByBackend = true;
+                    }
+                }
+            } catch (backendError) {
+                // Fallback below
+            }
+
+            if (!notebookHtml) {
+                const raw = await file.text();
+                const notebook = JSON.parse(raw);
+                notebookHtml = convertNotebookToHtml(notebook, file.name);
+            }
 
             state.topicContentQuill.setContents([]);
             state.topicContentQuill.clipboard.dangerouslyPasteHTML(notebookHtml);
@@ -595,10 +626,24 @@ function bindNotebookUploadHandlers() {
 
             saveActiveTopicEditorToState();
             byId('topic-editor-hint').textContent = `Notebook imported: ${file.name}`;
+            status.textContent = convertedByBackend
+                ? `Imported with nbconvert backend: ${file.name}`
+                : `Imported with local fallback renderer: ${file.name}`;
         } catch (error) {
             console.error('Notebook import failed:', error);
+            status.textContent = 'Notebook import failed. Check file format.';
             alert(`Failed to import notebook: ${error?.message || error}`);
+        } finally {
+            importBtn.disabled = false;
+            importBtn.textContent = 'Import Notebook';
         }
+    };
+
+    importBtn.addEventListener('click', importNotebook);
+    fileInput.addEventListener('change', () => {
+        status.textContent = fileInput.files && fileInput.files[0]
+            ? `Selected: ${fileInput.files[0].name}`
+            : 'Upload an .ipynb file to render notebook cells and outputs.';
     });
 }
 
