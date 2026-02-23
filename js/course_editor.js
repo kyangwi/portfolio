@@ -27,6 +27,158 @@ function makeId(prefix) {
     return `${prefix}_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
 }
 
+function escapeHtml(value) {
+    return (value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function normalizeSource(source) {
+    if (Array.isArray(source)) return source.join('');
+    if (typeof source === 'string') return source;
+    return '';
+}
+
+function formatInlineMarkdown(text) {
+    let html = escapeHtml(text);
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    return html;
+}
+
+function markdownToHtml(markdownText) {
+    const lines = normalizeSource(markdownText).replace(/\r\n/g, '\n').split('\n');
+    const html = [];
+    let paragraphBuffer = [];
+    let inList = false;
+
+    const flushParagraph = () => {
+        if (paragraphBuffer.length === 0) return;
+        const paragraph = paragraphBuffer.map((line) => formatInlineMarkdown(line)).join(' ');
+        html.push(`<p>${paragraph}</p>`);
+        paragraphBuffer = [];
+    };
+
+    const closeList = () => {
+        if (!inList) return;
+        html.push('</ul>');
+        inList = false;
+    };
+
+    lines.forEach((line) => {
+        const trimmed = line.trim();
+        if (!trimmed) {
+            flushParagraph();
+            closeList();
+            return;
+        }
+
+        const headingMatch = trimmed.match(/^(#{1,6})\s+(.*)$/);
+        if (headingMatch) {
+            flushParagraph();
+            closeList();
+            const level = headingMatch[1].length;
+            html.push(`<h${level}>${formatInlineMarkdown(headingMatch[2])}</h${level}>`);
+            return;
+        }
+
+        const listMatch = trimmed.match(/^[-*+]\s+(.*)$/);
+        if (listMatch) {
+            flushParagraph();
+            if (!inList) {
+                html.push('<ul>');
+                inList = true;
+            }
+            html.push(`<li>${formatInlineMarkdown(listMatch[1])}</li>`);
+            return;
+        }
+
+        closeList();
+        paragraphBuffer.push(trimmed);
+    });
+
+    flushParagraph();
+    closeList();
+    return html.join('');
+}
+
+function renderNotebookOutput(output) {
+    if (!output || typeof output !== 'object') return '';
+
+    if (output.output_type === 'stream') {
+        return `<pre class="jp-output-stream"><code>${escapeHtml(normalizeSource(output.text))}</code></pre>`;
+    }
+
+    if (output.output_type === 'error') {
+        const traceback = Array.isArray(output.traceback) ? output.traceback.join('\n') : '';
+        return `<pre class="jp-output-error"><code>${escapeHtml(traceback || output.evalue || 'Execution error')}</code></pre>`;
+    }
+
+    const data = output.data || {};
+    if (data['text/html']) {
+        return `<div class="jp-output-html">${normalizeSource(data['text/html'])}</div>`;
+    }
+    if (data['image/png']) {
+        return `<img class="jp-output-image" src="data:image/png;base64,${normalizeSource(data['image/png'])}" alt="Notebook output image">`;
+    }
+    if (data['text/markdown']) {
+        return `<div class="jp-output-markdown">${markdownToHtml(data['text/markdown'])}</div>`;
+    }
+    if (data['text/plain']) {
+        return `<pre class="jp-output-plain"><code>${escapeHtml(normalizeSource(data['text/plain']))}</code></pre>`;
+    }
+
+    return '';
+}
+
+function convertNotebookToHtml(notebook, fileName = 'notebook.ipynb') {
+    const cells = Array.isArray(notebook?.cells) ? notebook.cells : [];
+    const language = notebook?.metadata?.language_info?.name || 'python';
+
+    const renderedCells = cells.map((cell, index) => {
+        const source = normalizeSource(cell.source);
+        if (cell.cell_type === 'markdown') {
+            return `
+                <section class="jp-cell jp-markdown-cell">
+                    <div class="jp-cell-header">Markdown ${index + 1}</div>
+                    <div class="jp-markdown">${markdownToHtml(source)}</div>
+                </section>
+            `;
+        }
+
+        if (cell.cell_type === 'code') {
+            const outputs = Array.isArray(cell.outputs) ? cell.outputs : [];
+            const renderedOutputs = outputs.map(renderNotebookOutput).join('');
+            return `
+                <section class="jp-cell jp-code-cell">
+                    <div class="jp-cell-header">Code ${index + 1}</div>
+                    <pre><code class="language-${escapeHtml(language)}">${escapeHtml(source)}</code></pre>
+                    ${renderedOutputs ? `<div class="jp-outputs">${renderedOutputs}</div>` : ''}
+                </section>
+            `;
+        }
+
+        return `
+            <section class="jp-cell jp-raw-cell">
+                <div class="jp-cell-header">Raw ${index + 1}</div>
+                <pre><code>${escapeHtml(source)}</code></pre>
+            </section>
+        `;
+    }).join('');
+
+    return `
+        <div class="jp-notebook" data-filename="${escapeHtml(fileName)}">
+            <h3>Notebook: ${escapeHtml(fileName)}</h3>
+            ${renderedCells || '<p>No notebook cells found.</p>'}
+        </div>
+    `;
+}
+
 function normalizeLegacyChapters(chapters) {
     if (!Array.isArray(chapters)) return [];
     return chapters.map((chapter) => {
@@ -329,6 +481,50 @@ function bindImageHandlers() {
     });
 }
 
+function bindNotebookUploadHandlers() {
+    const fileInput = byId('topic-notebook-input');
+    const importBtn = byId('import-notebook-btn');
+    if (!fileInput || !importBtn) return;
+
+    importBtn.addEventListener('click', async () => {
+        if (state.selectedChapterIndex < 0 || state.selectedTopicIndex < 0) {
+            alert('Select a topic first.');
+            return;
+        }
+
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) {
+            alert('Choose an .ipynb file first.');
+            return;
+        }
+
+        if (!file.name.toLowerCase().endsWith('.ipynb')) {
+            alert('Only .ipynb files are supported.');
+            return;
+        }
+
+        try {
+            const raw = await file.text();
+            const notebook = JSON.parse(raw);
+            const notebookHtml = convertNotebookToHtml(notebook, file.name);
+
+            state.topicContentQuill.setContents([]);
+            state.topicContentQuill.clipboard.dangerouslyPasteHTML(notebookHtml);
+
+            const topicTitle = byId('topic-title');
+            if (topicTitle && !topicTitle.value.trim()) {
+                topicTitle.value = file.name.replace(/\.ipynb$/i, '');
+            }
+
+            saveActiveTopicEditorToState();
+            byId('topic-editor-hint').textContent = `Notebook imported: ${file.name}`;
+        } catch (error) {
+            console.error('Notebook import failed:', error);
+            alert(`Failed to import notebook: ${error?.message || error}`);
+        }
+    });
+}
+
 function goToStep(step) {
     const clamped = Math.min(3, Math.max(1, step));
     state.currentStep = clamped;
@@ -590,6 +786,7 @@ async function init() {
 
     initializeQuills();
     bindImageHandlers();
+    bindNotebookUploadHandlers();
     bindWizardButtons();
     bindStructureButtons();
     bindSaveButtons();
